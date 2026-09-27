@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "nano-banana-2": {
+      "source": "prime-skills/runcomfy-agent-skills",
+      "sourceType": "github",
+      "skillPath": "nano-banana-2/SKILL.md",
+      "computedHash": "1f8e3c29a2ac938e8f8d874a699ebcd4ed49d604cc3b8ea45d2eeadfc84f8382"
+    },
     "video-editing": {
       "source": "heygen-com/hyperframes",
       "sourceType": "github",
