@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "video-editing": {
+      "source": "heygen-com/hyperframes",
+      "sourceType": "github",
+      "skillPath": "skills/hyperframes-cli/SKILL.md",
+      "computedHash": "a506061705f3d679c471da309a829d2ec17befe8ee8f2fa9adc7ff84886477cf"
+    }
+  }
+}
