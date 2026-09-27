@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "ads-creative": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/ad-creative/SKILL.md",
+      "computedHash": "af571e0b3629999a241951e61de1893bc5c830106452f147d403dfadba146d57"
+    },
     "video-editing": {
       "source": "heygen-com/hyperframes",
       "sourceType": "github",
