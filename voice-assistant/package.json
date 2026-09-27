@@ -1,0 +1,26 @@
+{
+  "name": "claude-voice-assistant",
+  "version": "1.0.0",
+  "scripts": {
+    "build:client": "esbuild src/client.ts --bundle --format=esm --minify --outfile=public/app.js",
+    "create-engine": "tsx src/create-engine.ts",
+    "start": "npm run build:client && tsx src/server.ts",
+    "typecheck": "tsc"
+  },
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@elevenlabs/client": "^1.25.0",
+    "@elevenlabs/elevenlabs-js": "^2.69.0",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "private": "true"
+}
