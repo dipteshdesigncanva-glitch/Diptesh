@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "lead-magnets": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/lead-magnets/SKILL.md",
+      "computedHash": "268c83c38cc49d3e437042f5d4e3c31b822deb6012b9d5d7a1370ae500058018"
+    },
     "video-editing": {
       "source": "heygen-com/hyperframes",
       "sourceType": "github",
