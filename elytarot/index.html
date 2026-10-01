@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ely Tarot</title>
+<meta name="description" content="Tarot readings, weekly forecasts and live guidance from Ely, for love, work and the person you're becoming.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #1d1029;
+    --night-2: #2a1740;
+    --violet: #9b49b5;
+    --mauve: #b8709f;
+    --gold: #e9b562;
+    --dawn: #fbf2e4;
+    --ink: #2a1a35;
+    --ink-soft: #5d4a68;
+    --moon: #f3e9f7;
+    --moon-soft: #c9b6d6;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+    --display: "Bellefair", "Times New Roman", serif;
+    --body: "Jost", "Segoe UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--moon);
+    font-family: var(--body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; line-height: 1.08; }
+  p { margin: 0; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 4px; }
+
+  .wrap { width: min(1160px, 100% - 32px); margin-inline: auto; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: .6em;
+    padding: .95em 1.6em;
+    border-radius: 999px;
+    font: 500 1rem/1 var(--body);
+    letter-spacing: .01em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform .4s var(--ease-out), background-color .4s var(--ease-out), color .4s var(--ease-out), border-color .4s var(--ease-out);
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-gold { background: var(--gold); color: var(--night); }
+  .btn-gold:hover { background: #f2c77d; }
+  .btn-line { border-color: rgba(243, 233, 247, .35); color: var(--moon); background: transparent; }
+  .btn-line:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-ink { background: var(--ink); color: var(--dawn); }
+  .btn-ink:hover { background: var(--violet); }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: absolute; inset: 0 0 auto 0; z-index: 5;
+    padding-block: 22px;
+  }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand img { width: 44px; height: 44px; }
+  .brand span { font-family: var(--display); font-size: 1.5rem; letter-spacing: .02em; }
+  .nav ul { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; }
+  .nav ul a { text-decoration: none; color: var(--moon-soft); font-size: .98rem; transition: color .3s; }
+  .nav ul a:hover { color: var(--gold); }
+  .nav .btn { padding: .75em 1.25em; font-size: .95rem; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid; align-items: center;
+    padding-block: 120px 80px;
+    overflow: hidden;
+    background:
+      radial-gradient(60% 55% at 72% 48%, rgba(155, 73, 181, .22), transparent 70%),
+      var(--night);
+  }
+  .hero .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center; gap: 48px;
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 6.4vw, 5.6rem);
+    letter-spacing: -.01em;
+    max-width: 10ch;
+  }
+  .hero .lede {
+    margin-top: 28px;
+    max-width: 30em;
+    font-size: 1.2rem; font-weight: 300;
+    color: var(--moon-soft);
+  }
+  .hero .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
+  .hero .note { margin-top: 28px; font-size: .95rem; color: var(--moon-soft); }
+
+  .orbit { position: relative; aspect-ratio: 1; width: min(100%, 600px); justify-self: center; }
+  .orbit svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .orbit .ring {
+    fill: none; stroke: url(#dusk); stroke-width: 1.4; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: draw 1.8s var(--ease-draw) forwards;
+  }
+  .orbit .logo {
+    position: absolute; inset: 22%;
+    width: 56%; height: 56%;
+    opacity: 0; transform: scale(.92);
+    filter: drop-shadow(0 0 28px rgba(233, 181, 98, .25));
+    animation: arrive 1.6s var(--ease-out) 1.25s forwards;
+  }
+  .orbit .spark { fill: var(--gold); opacity: 0; animation: arrive .9s var(--ease-out) forwards, twinkle 5s ease-in-out infinite; }
+
+  .hero-copy > * { opacity: 0; transform: translateY(14px); animation: rise 1.1s var(--ease-out) forwards; }
+  .hero-copy > :nth-child(1) { animation-delay: .5s; }
+  .hero-copy > :nth-child(2) { animation-delay: .7s; }
+  .hero-copy > :nth-child(3) { animation-delay: .9s; }
+  .hero-copy > :nth-child(4) { animation-delay: 1.1s; }
+
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes arrive { to { opacity: 1; transform: none; } }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ---------- Draw a card ---------- */
+  .draw { padding-block: 40px 140px; background: var(--night); }
+  .draw .wrap {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: clamp(40px, 8vw, 120px); align-items: center;
+  }
+  .draw h2 { font-size: clamp(2.4rem, 4.4vw, 3.6rem); max-width: 14ch; }
+  .draw .intro { margin-top: 18px; color: var(--moon-soft); max-width: 32em; }
+
+  .reading { margin-top: 44px; min-height: 9.5em; }
+  .reading .card-name { font-family: var(--display); font-size: 2rem; color: var(--gold); }
+  .reading .card-msg { margin-top: 10px; font-size: 1.2rem; font-weight: 300; max-width: 30em; }
+  .reading .hint { color: var(--moon-soft); font-size: 1.05rem; }
+  .reading .fade { animation: rise .8s var(--ease-out) both; }
+  .draw .btn { margin-top: 28px; }
+
+  .deck {
+    position: relative; width: 248px; aspect-ratio: 5 / 8;
+    perspective: 1400px;
+    border: 0; padding: 0; background: none; cursor: pointer; color: inherit;
+    border-radius: 18px;
+  }
+  .deck::before, .deck::after {
+    content: ""; position: absolute; inset: 0; border-radius: 18px;
+    background: var(--night-2); border: 1px solid rgba(233, 181, 98, .25);
+  }
+  .deck::before { transform: translate(14px, 10px) rotate(4deg); }
+  .deck::after { transform: translate(7px, 5px) rotate(2deg); }
+  .card {
+    position: absolute; inset: 0; z-index: 1;
+    transform-style: preserve-3d;
+    transition: transform .9s var(--ease-out);
+  }
+  .deck:hover .card { transform: translateY(-6px) rotate(-1deg); }
+  .deck.is-flipped .card { transform: rotateY(180deg); }
+  .deck.is-flipped:hover .card { transform: rotateY(180deg) translateY(-6px); }
+  .face {
+    position: absolute; inset: 0;
+    border-radius: 18px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: grid; place-items: center;
+    overflow: hidden;
+  }
+  .face.back {
+    background: radial-gradient(circle at 50% 50%, #3a1f52, var(--night-2) 70%);
+    border: 1px solid rgba(233, 181, 98, .45);
+  }
+  .face.front {
+    transform: rotateY(180deg);
+    background: var(--dawn); color: var(--ink);
+    border: 1px solid var(--gold);
+    grid-template-rows: 1fr auto;
+    padding: 26px 18px 22px;
+  }
+  .face.front::before {
+    content: ""; position: absolute; inset: 9px;
+    border: 1px solid rgba(155, 73, 181, .35); border-radius: 12px;
+  }
+  .face.front svg { width: 72%; }
+  .face.front .glyph * { fill: none; stroke: url(#dusk-card); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .face.front .name { font-family: var(--display); font-size: 1.45rem; text-align: center; }
+
+  /* ---------- Horizon ---------- */
+  .horizon {
+    position: relative; height: clamp(220px, 30vw, 360px);
+    background: linear-gradient(to bottom, var(--night) 0%, #3b1d52 22%, #7d3f8e 46%, #c27d8e 66%, #e9b562 84%, var(--dawn) 100%);
+    overflow: hidden;
+  }
+  .horizon svg { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(1100px, 140%); }
+  .horizon circle { fill: none; stroke: var(--dawn); stroke-width: 1.2; opacity: .55; }
+
+  /* ---------- Light sections ---------- */
+  .day { background: var(--dawn); color: var(--ink); }
+  .section { padding-block: clamp(80px, 11vw, 140px); }
+  .section-head { max-width: 40em; }
+  .section-head h2 { font-size: clamp(2.4rem, 4.4vw, 3.6rem); }
+  .section-head p { margin-top: 18px; font-size: 1.15rem; font-weight: 300; color: var(--ink-soft); }
+
+  .menu { margin-top: 64px; border-top: 1px solid rgba(42, 26, 53, .16); }
+  .menu-row {
+    display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.6fr) auto;
+    gap: 32px; align-items: baseline;
+    padding-block: 34px;
+    border-bottom: 1px solid rgba(42, 26, 53, .16);
+  }
+  .menu-row h3 { font-size: clamp(1.8rem, 2.6vw, 2.3rem); }
+  .menu-row .for { margin-top: 6px; color: var(--violet); font-size: .98rem; }
+  .menu-row p.desc { color: var(--ink-soft); max-width: 34em; }
+  .menu-row a {
+    color: var(--ink); text-decoration: none; font-weight: 500; white-space: nowrap;
+    border-bottom: 1px solid var(--gold); padding-bottom: 2px;
+    transition: color .3s, border-color .3s;
+  }
+  .menu-row a:hover { color: var(--violet); border-color: var(--violet); }
+
+  .steps {
+    margin-top: 96px;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px;
+    list-style: none; padding: 0; counter-reset: step;
+  }
+  .steps li { counter-increment: step; }
+  .steps li::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 1px solid var(--mauve); color: var(--violet);
+    font-family: var(--display); font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  .steps h3 { font-size: 1.6rem; }
+  .steps p { margin-top: 8px; color: var(--ink-soft); }
+  .steps-title { margin-top: 110px; font-size: clamp(2rem, 3.4vw, 2.8rem); }
+  .steps-title + .steps { margin-top: 40px; }
+
+  /* ---------- Membership ---------- */
+  .circle-section { background: linear-gradient(to bottom, var(--dawn), #f6e6cc); color: var(--ink); }
+  .tiers { margin-top: 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; align-items: stretch; }
+  .tier { border-radius: 28px; padding: clamp(32px, 4vw, 52px); display: flex; flex-direction: column; }
+  .tier h3 { font-size: clamp(2rem, 3vw, 2.6rem); }
+  .tier .sub { margin-top: 6px; font-size: 1.05rem; }
+  .tier ul { list-style: none; padding: 0; margin: 30px 0 36px; display: grid; gap: 14px; }
+  .tier li { display: grid; grid-template-columns: 18px 1fr; gap: 14px; align-items: start; }
+  .tier li svg { margin-top: .3em; width: 18px; height: 18px; }
+  .tier .btn { margin-top: auto; align-self: flex-start; }
+  .tier-a { border: 1px solid rgba(42, 26, 53, .2); }
+  .tier-a .sub { color: var(--ink-soft); }
+  .tier-a li svg path { fill: var(--mauve); }
+  .tier-b { background: var(--night); color: var(--moon); position: relative; overflow: hidden; }
+  .tier-b .sub { color: var(--gold); }
+  .tier-b li svg path { fill: var(--gold); }
+  .tier-b .halo { position: absolute; right: -120px; top: -120px; width: 340px; opacity: .5; pointer-events: none; }
+  .tier-b .halo circle { fill: none; stroke: url(#dusk); stroke-width: 1; }
+  .tier-b > :not(.halo) { position: relative; }
+
+  /* ---------- Weekly ---------- */
+  .weekly { background: #f6e6cc; color: var(--ink); padding-top: 0; }
+  .signs { margin-top: 56px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .signs a {
+    display: grid; justify-items: center; gap: 6px;
+    padding: 22px 8px; border-radius: 20px;
+    text-decoration: none; color: var(--ink);
+    border: 1px solid rgba(42, 26, 53, .14);
+    transition: background-color .35s var(--ease-out), border-color .35s var(--ease-out), color .35s var(--ease-out);
+  }
+  .signs a:hover { background: var(--ink); color: var(--dawn); border-color: var(--ink); }
+  .signs .glyph-z { font-size: 1.9rem; line-height: 1; color: var(--violet); transition: color .35s; font-family: "Segoe UI Symbol", "Noto Sans Symbols", var(--body); }
+  .signs a:hover .glyph-z { color: var(--gold); }
+  .signs .sign { font-size: .95rem; }
+  .bilingual { margin-top: 26px; color: var(--ink-soft); }
+
+  /* ---------- About ---------- */
+  .about { background: #f6e6cc; color: var(--ink); }
+  .about .wrap { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 7vw, 110px); align-items: center; }
+  .about blockquote {
+    margin: 0;
+    font-family: var(--display); font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1.12;
+    color: var(--ink);
+  }
+  .about .who { margin-top: 26px; color: var(--violet); }
+  .about .body p + p { margin-top: 18px; }
+  .about .body p { color: var(--ink-soft); font-size: 1.1rem; max-width: 34em; }
+  .chart { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; list-style: none; }
+  .chart li { padding: .5em 1.1em; border-radius: 999px; background: var(--dawn); font-size: .98rem; }
+  .chart b { font-weight: 500; color: var(--violet); }
+
+  /* ---------- Footer ---------- */
+  .foot { background: var(--ink); color: var(--moon); padding-block: 96px 40px; }
+  .foot .cta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 48px; align-items: center; }
+  .foot .cta img { width: 160px; }
+  .foot h2 { font-size: clamp(2.4rem, 4.6vw, 3.8rem); max-width: 16ch; }
+  .foot .cta p { margin-top: 14px; color: var(--moon-soft); max-width: 32em; }
+  .foot .cta .btn { margin-top: 30px; }
+  .foot .links {
+    margin-top: 80px; padding-top: 28px;
+    border-top: 1px solid rgba(243, 233, 247, .15);
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px;
+    font-size: .95rem; color: var(--moon-soft);
+  }
+  .foot .links ul { display: flex; flex-wrap: wrap; gap: 24px; list-style: none; margin: 0; padding: 0; }
+  .foot .links a { text-decoration: none; transition: color .3s; }
+  .foot .links a:hover { color: var(--gold); }
+  .foot .care { margin-top: 18px; font-size: .88rem; color: rgba(201, 182, 214, .75); max-width: 60em; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 920px) {
+    .nav ul { display: none; }
+    .hero { padding-block: 104px 64px; }
+    .hero .wrap { grid-template-columns: 1fr; gap: 24px; }
+    .orbit { order: -1; width: min(78vw, 400px); }
+    .draw .wrap { grid-template-columns: 1fr; justify-items: start; }
+    .deck { width: 210px; justify-self: center; }
+    .menu-row { grid-template-columns: 1fr; gap: 12px; }
+    .steps { grid-template-columns: 1fr; gap: 36px; }
+    .tiers { grid-template-columns: 1fr; }
+    .signs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .about .wrap { grid-template-columns: 1fr; }
+    .foot .cta { grid-template-columns: 1fr; }
+    .foot .cta img { width: 110px; }
+  }
+  @media (max-width: 520px) {
+    .brand span { font-size: 1.3rem; }
+    .nav .btn { padding: .7em 1em; font-size: .9rem; }
+    .signs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .hero .actions .btn { flex: 1 1 100%; justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Shared gradients, taken from the logo's violet-to-gold stroke -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9b49b5"/>
+      <stop offset=".55" stop-color="#b8709f"/>
+      <stop offset="1" stop-color="#e9b562"/>
+    </linearGradient>
+    <linearGradient id="dusk-card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a3fa6"/>
+      <stop offset=".6" stop-color="#b0648f"/>
+      <stop offset="1" stop-color="#d49a45"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Ely Tarot, home">
+      <img src="assets/logo.png" alt="">
+      <span>Ely Tarot</span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#draw">Today's card</a></li>
+        <li><a href="#readings">Readings</a></li>
+        <li><a href="#circle">Membership</a></li>
+        <li><a href="#weekly">Weekly by sign</a></li>
+        <li><a href="#about">About Ely</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-gold" href="https://ko-fi.com/elytarot/commissions">Book a reading</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>Clarity for the questions you carry.</h1>
+        <p class="lede">Tarot readings, weekly forecasts and live guidance from Ely, for love, work and the person you're becoming.</p>
+        <div class="actions">
+          <a class="btn btn-gold" href="https://ko-fi.com/elytarot/commissions">Book a reading</a>
+          <a class="btn btn-line" href="#draw">Pull a card for today</a>
+        </div>
+        <p class="note">Readings in English and Spanish.</p>
+      </div>
+
+      <div class="orbit" aria-hidden="true">
+        <svg class="rings" viewBox="0 0 600 600" id="rings"></svg>
+        <img class="logo" src="assets/logo.png" alt="">
+      </div>
+    </div>
+  </section>
+
+  <section class="draw" id="draw" aria-labelledby="draw-title">
+    <div class="wrap">
+      <button class="deck" id="deck" type="button" aria-label="Draw a card">
+        <span class="card">
+          <span class="face back">
+            <svg viewBox="0 0 200 320" width="100%" height="100%" aria-hidden="true">
+              <g fill="none" stroke="url(#dusk)" stroke-width="1.1">
+                <circle cx="100" cy="160" r="22"/><circle cx="100" cy="160" r="34"/><circle cx="100" cy="160" r="46"/>
+                <circle cx="100" cy="160" r="58"/><circle cx="100" cy="160" r="70"/><circle cx="100" cy="160" r="82"/>
+                <rect x="10" y="10" width="180" height="300" rx="10" opacity=".6"/>
+              </g>
+              <path d="M100 146 L103 157 L114 160 L103 163 L100 174 L97 163 L86 160 L97 157Z" fill="#e9b562"/>
+            </svg>
+          </span>
+          <span class="face front">
+            <svg viewBox="0 0 100 100" class="glyph" id="card-glyph" aria-hidden="true"></svg>
+            <span class="name" id="card-face-name"></span>
+          </span>
+        </span>
+      </button>
+
+      <div>
+        <h2 id="draw-title">Pull a card for today.</h2>
+        <p class="intro">Take a breath, think of what's on your mind, then tap the deck. One card, one thought to carry with you.</p>
+        <div class="reading" aria-live="polite" id="reading">
+          <p class="hint">Your card will appear here.</p>
+        </div>
+        <button class="btn btn-line" type="button" id="draw-btn">Draw a card</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="horizon" aria-hidden="true">
+    <svg viewBox="0 0 1100 300" preserveAspectRatio="xMidYMax meet">
+      <circle cx="550" cy="420" r="160"/><circle cx="550" cy="420" r="200"/><circle cx="550" cy="420" r="240"/>
+      <circle cx="550" cy="420" r="280"/><circle cx="550" cy="420" r="320"/><circle cx="550" cy="420" r="360"/>
+    </svg>
+  </div>
+
+  <section class="day section" id="readings" aria-labelledby="readings-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="readings-title">Choose your reading.</h2>
+        <p>Personal readings are booked through Ko-fi. Pick the one closest to what's on your mind; Ely tailors the spread to your question.</p>
+      </div>
+
+      <div class="menu">
+        <article class="menu-row">
+          <div><h3>One clear question</h3><p class="for">When one thing won't leave your mind</p></div>
+          <p class="desc">A focused spread around a single question, read plainly: what's happening, what's in the way, and what's likely if nothing changes.</p>
+          <a href="https://ko-fi.com/elytarot/commissions">Book this reading</a>
+        </article>
+        <article class="menu-row">
+          <div><h3>Love and connection</h3><p class="for">For a partner, a crush, or a goodbye</p></div>
+          <p class="desc">Looks at both sides of the bond: what they feel, what you need, and the pattern that keeps repeating. Ends with what's yours to do next.</p>
+          <a href="https://ko-fi.com/elytarot/commissions">Book this reading</a>
+        </article>
+        <article class="menu-row">
+          <div><h3>Work and direction</h3><p class="for">For decisions you've been circling</p></div>
+          <p class="desc">Career moves, money worries, a project that won't start. A spread built for choices, so you can see each path before you take one.</p>
+          <a href="https://ko-fi.com/elytarot/commissions">Book this reading</a>
+        </article>
+        <article class="menu-row">
+          <div><h3>The wider view</h3><p class="for">When everything is shifting at once</p></div>
+          <p class="desc">A deep reading across love, work, home and inner growth, for turning points, birthdays and new chapters.</p>
+          <a href="https://ko-fi.com/elytarot/commissions">Book this reading</a>
+        </article>
+      </div>
+
+      <h2 class="steps-title">How a reading works</h2>
+      <ol class="steps">
+        <li><h3>Choose a reading</h3><p>Pick the reading that fits on Ely's Ko-fi page and complete your booking.</p></li>
+        <li><h3>Share your question</h3><p>Tell Ely what's on your mind, in your own words. A few honest lines are enough.</p></li>
+        <li><h3>Receive your reading</h3><p>Ely lays out your cards, sits with them, and sends you what they show.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="circle-section section" id="circle" aria-labelledby="circle-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="circle-title">Stay close between readings.</h2>
+        <p>Join Ely's circle on Ko-fi for weekly readings, members-only live sessions and more one-to-one time.</p>
+      </div>
+
+      <div class="tiers">
+        <article class="tier tier-a">
+          <h3>Lecturas de Tarot</h3>
+          <p class="sub">Tarot readings, every week</p>
+          <ul>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Weekly readings for every sign: love, money and growth</span></li>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Members-only live sessions</span></li>
+          </ul>
+          <a class="btn btn-ink" href="https://ko-fi.com/elytarot">Join on Ko-fi</a>
+        </article>
+
+        <article class="tier tier-b">
+          <svg class="halo" viewBox="0 0 340 340" aria-hidden="true">
+            <circle cx="170" cy="170" r="60"/><circle cx="170" cy="170" r="85"/><circle cx="170" cy="170" r="110"/><circle cx="170" cy="170" r="135"/><circle cx="170" cy="170" r="160"/>
+          </svg>
+          <h3>Canalizaciones Exclusivas</h3>
+          <p class="sub">Exclusive channelled messages</p>
+          <ul>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Everything in Lecturas de Tarot</span></li>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Exclusive content and channelled messages</span></li>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Direct messages with Ely, and a say in upcoming readings</span></li>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Discounts on personal readings</span></li>
+            <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 0 L10.8 7.2 L18 9 L10.8 10.8 L9 18 L7.2 10.8 L0 9 L7.2 7.2Z"/></svg><span>Tarot courses to learn the cards yourself</span></li>
+          </ul>
+          <a class="btn btn-gold" href="https://ko-fi.com/elytarot">Join on Ko-fi</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="weekly section" id="weekly" aria-labelledby="weekly-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="weekly-title">This week, by sign.</h2>
+        <p>Free weekly readings for all twelve signs on YouTube. Find yours and press play.</p>
+      </div>
+      <div class="signs" id="signs"></div>
+      <p class="bilingual">Lecturas semanales también en español.</p>
+    </div>
+  </section>
+
+  <section class="about section" id="about" aria-labelledby="about-title">
+    <div class="wrap">
+      <div>
+        <blockquote id="about-title">“Tarot is a guide on the road, not a sentence passed on you.”</blockquote>
+        <p class="who">Ely, tarot reader and spiritual coach</p>
+      </div>
+      <div class="body">
+        <p>I read tarot as a companion for the path: a way to see your situation more clearly and choose your next step with more peace.</p>
+        <p>That comes with responsibility. I read with respect, sensitivity and honesty, telling you what the cards show and helping you carry it gently.</p>
+        <ul class="chart" aria-label="Ely's birth chart">
+          <li><b>Sun</b> in Cancer</li>
+          <li><b>Rising</b> in Gemini</li>
+          <li><b>Moon</b> in Aquarius</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="cta">
+      <img src="assets/logo.png" alt="Ely Tarot">
+      <div>
+        <h2>Bring your question. Leave with a next step.</h2>
+        <p>Personal readings open now on Ko-fi.</p>
+        <a class="btn btn-gold" href="https://ko-fi.com/elytarot/commissions">Book a reading</a>
+      </div>
+    </div>
+    <div class="links">
+      <ul>
+        <li><a href="https://www.youtube.com/@ElyTarot">YouTube</a></li>
+        <li><a href="https://www.instagram.com/elytarot_/">Instagram</a></li>
+        <li><a href="https://www.tiktok.com/@elytarot">TikTok</a></li>
+        <li><a href="https://ko-fi.com/elytarot">Ko-fi</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+      <span>© <span id="year">2026</span> Ely Tarot</span>
+    </div>
+    <p class="care">Readings are for reflection and guidance. They don't replace medical, legal, financial or psychological advice.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* Hero: concentric rings that draw in, echoing the logo */
+  const rings = document.getElementById("rings");
+  for (let i = 0; i < 9; i++) {
+    const r = 150 + i * 17;
+    rings.appendChild(el("circle", {
+      class: "ring", cx: 300, cy: 300, r, pathLength: 1,
+      transform: `rotate(${-90 + i * 23} 300 300)`,
+      style: `animation-delay:${i * 0.08}s; opacity:${1 - i * 0.07}`
+    }));
+  }
+  const star = (x, y, s) => `M${x} ${y - s} L${x + s * .22} ${y - s * .22} L${x + s} ${y} L${x + s * .22} ${y + s * .22} L${x} ${y + s} L${x - s * .22} ${y + s * .22} L${x - s} ${y} L${x - s * .22} ${y - s * .22}Z`;
+  [[78, 150, 10], [530, 110, 7], [560, 400, 11], [96, 470, 7], [300, 18, 8], [470, 560, 6]].forEach(([x, y, s], i) => {
+    rings.appendChild(el("path", {
+      class: "spark", d: star(x, y, s),
+      style: `animation-delay:${1.6 + i * 0.15}s, ${2.6 + i * 0.7}s`
+    }));
+  });
+
+  /* Draw a card */
+  const rays = (n, r1, r2) => Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * Math.PI * 2;
+    return `<line x1="${50 + Math.cos(a) * r1}" y1="${50 + Math.sin(a) * r1}" x2="${50 + Math.cos(a) * r2}" y2="${50 + Math.sin(a) * r2}"/>`;
+  }).join("");
+
+  const cards = [
+    { name: "The Star", glyph: `<path d="${star(50, 50, 30)}"/><path d="${star(22, 22, 6)}"/><path d="${star(80, 76, 5)}"/>`,
+      msg: "Hope is coming back. Rest, refill, and let yourself believe the next part can be good." },
+    { name: "The Moon", glyph: `<path d="M60 18 A32 32 0 1 0 60 82 A26 26 0 1 1 60 18Z"/><path d="${star(76, 30, 5)}"/>`,
+      msg: "Not everything is clear yet, and that's all right. Trust what you feel more than what you fear." },
+    { name: "The Sun", glyph: `<circle cx="50" cy="50" r="16"/>${rays(12, 24, 36)}`,
+      msg: "Something is going right. Let yourself be seen enjoying it." },
+    { name: "The Lovers", glyph: `<circle cx="39" cy="50" r="20"/><circle cx="61" cy="50" r="20"/><path d="${star(50, 18, 5)}"/>`,
+      msg: "A choice of the heart. Choose what fits who you are now, not who you used to be." },
+    { name: "Wheel of Fortune", glyph: `<circle cx="50" cy="50" r="32"/><circle cx="50" cy="50" r="8"/>${rays(8, 8, 32)}`,
+      msg: "Things are turning. What felt stuck is starting to move. Go with it." },
+    { name: "Strength", glyph: `<path d="M50 50 C38 32 18 36 18 50 C18 64 38 68 50 50 C62 32 82 36 82 50 C82 64 62 68 50 50Z"/><path d="M30 80 Q50 70 70 80"/>`,
+      msg: "Gentleness is the strong move today. Patience will get you further than force." },
+    { name: "The High Priestess", glyph: `<rect x="20" y="30" width="10" height="52"/><rect x="70" y="30" width="10" height="52"/><path d="M56 16 A12 12 0 1 0 56 40 A9 9 0 1 1 56 16Z"/>`,
+      msg: "You already know more than you're admitting. Get quiet and listen." },
+    { name: "Temperance", glyph: `<path d="M50 18 L80 72 L20 72Z"/><path d="M24 84 Q37 76 50 84 T76 84"/><circle cx="50" cy="52" r="6"/>`,
+      msg: "Find the middle way. Small, steady changes will bring things back into balance." },
+    { name: "The World", glyph: `<ellipse cx="50" cy="50" rx="22" ry="32"/><circle cx="18" cy="18" r="5"/><circle cx="82" cy="18" r="5"/><circle cx="18" cy="82" r="5"/><circle cx="82" cy="82" r="5"/>`,
+      msg: "A chapter is closing well. Notice how far you've come before you begin the next one." },
+    { name: "The Hermit", glyph: `<path d="M50 22 L72 60 L28 60Z"/><path d="M50 72 L28 34 L72 34Z"/><line x1="50" y1="72" x2="50" y2="90"/>`,
+      msg: "Step back from the noise. The answer you want is found alone, not in the crowd." },
+    { name: "The Empress", glyph: `<circle cx="50" cy="38" r="20"/><line x1="50" y1="58" x2="50" y2="88"/><line x1="36" y1="74" x2="64" y2="74"/>`,
+      msg: "Nourish what you've started, and yourself. Growth is happening even when it's slow." }
+  ];
+
+  const deck = document.getElementById("deck");
+  const drawBtn = document.getElementById("draw-btn");
+  const glyph = document.getElementById("card-glyph");
+  const faceName = document.getElementById("card-face-name");
+  const reading = document.getElementById("reading");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let current = -1, busy = false;
+
+  const reveal = () => {
+    let next;
+    do { next = Math.floor(Math.random() * cards.length); } while (next === current);
+    current = next;
+    const c = cards[next];
+    glyph.innerHTML = c.glyph;
+    faceName.textContent = c.name;
+    deck.classList.add("is-flipped");
+    deck.setAttribute("aria-label", `Your card is ${c.name}. Draw another card`);
+    reading.innerHTML = `<p class="card-name fade">${c.name}</p><p class="card-msg fade" style="animation-delay:.12s">${c.msg}</p>`;
+    drawBtn.textContent = "Draw another card";
+  };
+
+  const draw = () => {
+    if (busy) return;
+    busy = true;
+    if (deck.classList.contains("is-flipped")) {
+      deck.classList.remove("is-flipped");
+      setTimeout(() => { reveal(); busy = false; }, reduce ? 0 : 650);
+    } else {
+      reveal();
+      busy = false;
+    }
+  };
+  deck.addEventListener("click", draw);
+  drawBtn.addEventListener("click", draw);
+
+  /* Weekly readings by sign */
+  const signs = [["♈", "Aries"], ["♉", "Taurus"], ["♊", "Gemini"], ["♋", "Cancer"], ["♌", "Leo"], ["♍", "Virgo"],
+                 ["♎", "Libra"], ["♏", "Scorpio"], ["♐", "Sagittarius"], ["♑", "Capricorn"], ["♒", "Aquarius"], ["♓", "Pisces"]];
+  document.getElementById("signs").innerHTML = signs.map(([g, n]) =>
+    `<a href="https://www.youtube.com/@ElyTarot/search?query=${encodeURIComponent(n)}"><span class="glyph-z" aria-hidden="true">${g}&#xFE0E;</span><span class="sign">${n}</span></a>`
+  ).join("");
+})();
+</script>
+</body>
+</html>
