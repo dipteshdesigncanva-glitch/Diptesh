@@ -1,0 +1,62 @@
+{
+ "hook": {
+  "text": "This keyboard has no business sounding this good.",
+  "dur": 2.305,
+  "sr": 24000
+ },
+ "meet": {
+  "text": "Meet the Havoc, by Lethal Black.",
+  "dur": 1.641,
+  "sr": 24000
+ },
+ "venom": {
+  "text": "Pre-lubed Venom switches.",
+  "dur": 1.327,
+  "sr": 24000
+ },
+ "layers": {
+  "text": "Five layers of sound dampening.",
+  "dur": 1.432,
+  "sr": 24000
+ },
+ "gasket": {
+  "text": "Gasket mounted.",
+  "dur": 0.835,
+  "sr": 24000
+ },
+ "swap": {
+  "text": "Hot-swappable.",
+  "dur": 0.797,
+  "sr": 24000
+ },
+ "pbt": {
+  "text": "Doubleshot PBT keycaps.",
+  "dur": 1.589,
+  "sr": 24000
+ },
+ "specs": {
+  "text": "Tri-mode wireless, with thousand hertz polling.",
+  "dur": 2.453,
+  "sr": 24000
+ },
+ "gaming": {
+  "text": "Built for competitive gaming.",
+  "dur": 1.386,
+  "sr": 24000
+ },
+ "rating": {
+  "text": "Rated four point six eight stars.",
+  "dur": 1.703,
+  "sr": 24000
+ },
+ "price": {
+  "text": "All this, for just sixty-four forty-nine.",
+  "dur": 1.943,
+  "sr": 24000
+ },
+ "cta": {
+  "text": "Hit the link, and grab yours.",
+  "dur": 1.399,
+  "sr": 24000
+ }
+}
