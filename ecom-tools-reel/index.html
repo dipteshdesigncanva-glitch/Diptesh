@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 500; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-SemiBold.otf"); font-weight: 600; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Bold.otf"); font-weight: 700; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-ExtraBold.otf"); font-weight: 800; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Black.otf"); font-weight: 900; }
+
+      :root {
+        --bg: #06040a;
+        --ink: #f5f0ff;
+        --muted: #b9acd6;
+        --violet: #a66bff;
+        --violet-soft: #b98cff;
+        --violet-deep: #7c2cff;
+        --hl: #8b3dff;
+        --glow: 0 0 34px rgba(150, 80, 255, 0.55), 0 0 10px rgba(150, 80, 255, 0.35);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      body { font-family: "InterHF", "Inter", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+      /* ---------- persistent background ---------- */
+      #bg { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+      #bg .glow {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 46% 52% at 50% 52%, rgba(96, 34, 170, 0.5) 0%, rgba(50, 16, 92, 0.28) 45%, rgba(6, 4, 10, 0) 75%);
+      }
+      #bg .grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+        background-size: 64px 64px;
+      }
+      #rings { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+      /* ---------- chrome ---------- */
+      #brand {
+        position: absolute; top: 36px; right: 52px; z-index: 50;
+        display: flex; align-items: center; gap: 18px;
+        height: 92px; padding: 0 30px 0 12px; border-radius: 46px;
+        background: rgba(14, 8, 24, 0.82); border: 2px solid rgba(166, 107, 255, 0.35);
+      }
+      #brand img { height: 62px; mix-blend-mode: screen; }
+      #brand span { font-weight: 800; font-size: 27px; letter-spacing: 0.16em; color: #fff; }
+      #brand span b { color: var(--violet); font-weight: 900; }
+      #tag {
+        position: absolute; top: 40px; left: 52px; z-index: 50;
+        padding: 12px 22px; border-radius: 10px; background: var(--hl);
+        font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: #fff;
+        box-shadow: 0 0 30px rgba(139, 61, 255, 0.55);
+      }
+      #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; background: rgba(255, 255, 255, 0.06); z-index: 50; }
+      #progress i {
+        position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0);
+        background: linear-gradient(90deg, #6d28d9, #a855f7); box-shadow: 0 0 18px rgba(168, 85, 247, 0.8);
+      }
+      #wipe {
+        position: absolute; top: -60px; left: 0; width: 1500px; height: 1200px; z-index: 40;
+        background: linear-gradient(90deg, #5b16d6 0%, #7c2cff 55%, #a35cff 86%, #efe4ff 100%);
+      }
+
+      /* ---------- scenes ---------- */
+      .scene {
+        position: absolute; inset: 0; z-index: 10;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding-top: 30px;
+      }
+      .line { display: flex; justify-content: center; align-items: baseline; white-space: nowrap; }
+      .line > * + * { margin-left: 0.27em; }
+      .w, .big, .hl, .acc { display: inline-block; }
+      .sm { font-size: 58px; font-weight: 700; line-height: 1.2; }
+      .md { font-size: 84px; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
+      .xl { font-size: 168px; font-weight: 900; line-height: 1; letter-spacing: -0.035em; }
+      .acc { color: var(--violet-soft); }
+      .big { color: var(--violet); text-shadow: var(--glow); }
+      .hl {
+        background: var(--hl); color: #fff; padding: 0 0.16em; border-radius: 0.1em;
+        box-shadow: 0 0 26px rgba(139, 61, 255, 0.6); font-weight: 900; letter-spacing: -0.01em;
+      }
+      .dim { color: var(--muted); font-weight: 600; }
+
+      /* icon tiles */
+      .icons { display: flex; gap: 30px; margin-top: 44px; }
+      .tile {
+        width: 116px; height: 116px; border-radius: 26px;
+        display: grid; place-items: center;
+        background: linear-gradient(160deg, rgba(60, 26, 110, 0.9), rgba(22, 10, 40, 0.95));
+        border: 2px solid rgba(166, 107, 255, 0.55); box-shadow: 0 0 28px rgba(139, 61, 255, 0.35);
+      }
+      .tile svg { width: 64px; height: 64px; }
+
+      /* tool card */
+      .card {
+        margin-top: 46px; display: flex; align-items: center; gap: 34px;
+        padding: 34px 54px 34px 44px; border-radius: 26px; min-width: 1000px;
+        background: linear-gradient(180deg, rgba(36, 16, 66, 0.92), rgba(16, 8, 30, 0.92));
+        border: 2px solid rgba(166, 107, 255, 0.7);
+        box-shadow: 0 0 50px rgba(139, 61, 255, 0.35), inset 0 0 40px rgba(139, 61, 255, 0.12);
+      }
+      .card .num { font-size: 96px; font-weight: 900; color: var(--violet); text-shadow: var(--glow); letter-spacing: -0.03em; }
+      .card .ic { width: 96px; height: 96px; border-radius: 22px; display: grid; place-items: center; background: rgba(139, 61, 255, 0.18); }
+      .card .ic svg { width: 64px; height: 64px; }
+      .card .t { font-size: 54px; font-weight: 800; line-height: 1.08; letter-spacing: -0.01em; }
+      .card .s { margin-top: 12px; font-size: 24px; font-weight: 800; letter-spacing: 0.2em; color: var(--violet-soft); }
+
+      /* chips */
+      .chips { display: flex; gap: 30px; margin-top: 48px; }
+      .chip {
+        display: flex; align-items: baseline; gap: 18px;
+        padding: 26px 40px; border-radius: 22px; font-size: 52px; font-weight: 900; letter-spacing: -0.01em;
+        background: rgba(255, 255, 255, 0.04); border: 2px solid rgba(255, 255, 255, 0.14);
+      }
+      .chip em { font-style: normal; font-size: 30px; color: var(--violet-soft); font-weight: 800; }
+      .chip .ring {
+        position: absolute; inset: -2px; border-radius: 22px; border: 3px solid var(--violet);
+        background: rgba(139, 61, 255, 0.16); box-shadow: 0 0 30px rgba(139, 61, 255, 0.6);
+      }
+      .chip { position: relative; }
+
+      /* progress-style meters */
+      .meter { display: flex; align-items: center; gap: 26px; margin-top: 54px; font-size: 24px; font-weight: 800; letter-spacing: 0.2em; }
+      .meter .lab { color: var(--muted); }
+      .meter .lab.v { color: var(--violet-soft); }
+      .meter .track { position: relative; width: 820px; height: 18px; border-radius: 9px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+      .meter .fill { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); border-radius: 9px; background: linear-gradient(90deg, #7c2cff, #c9a6ff 85%, #fff); }
+
+      /* bar chart */
+      .bars { position: absolute; right: 250px; bottom: 170px; display: flex; align-items: flex-end; gap: 16px; height: 230px; }
+      .bars i { display: block; width: 34px; border-radius: 6px 6px 2px 2px; transform-origin: 50% 100%; background: linear-gradient(180deg, #9b5cff, rgba(124, 44, 255, 0.25)); }
+
+      /* calculator */
+      .calc {
+        margin-top: 30px; width: 1000px; padding: 26px 40px; border-radius: 22px;
+        background: rgba(10, 6, 18, 0.9); border: 2px solid rgba(255, 255, 255, 0.12);
+        font-size: 34px; font-weight: 600;
+      }
+      .calc .r { display: flex; justify-content: space-between; padding: 8px 0; color: var(--muted); }
+      .calc .r b { color: #fff; font-weight: 800; }
+      .calc .r.p { margin-top: 8px; padding-top: 16px; border-top: 2px solid rgba(255, 255, 255, 0.12); color: var(--violet-soft); font-weight: 800; }
+      .calc .r.p b { color: var(--violet); font-size: 44px; text-shadow: var(--glow); }
+
+      /* ad mockups */
+      .ad {
+        position: absolute; top: 250px; width: 360px; height: 500px; border-radius: 26px; padding: 22px;
+        background: linear-gradient(180deg, #1e1034, #120a20); border: 2px solid rgba(166, 107, 255, 0.4);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      }
+      .ad .hd { display: flex; align-items: center; gap: 14px; }
+      .ad .av { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #a66bff, #ff6aa2); }
+      .ad .ln { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.25); }
+      .ad .img { margin: 20px 0; height: 270px; border-radius: 16px; }
+      .ad .cta { height: 54px; border-radius: 12px; background: rgba(166, 107, 255, 0.35); display: grid; place-items: center; font-size: 22px; font-weight: 800; letter-spacing: 0.14em; color: #fff; }
+      .ad .spons { font-size: 18px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+
+      /* comment box */
+      .cbox {
+        margin-top: 40px; width: 1000px; display: flex; align-items: center; gap: 22px;
+        padding: 16px 16px 16px 20px; border-radius: 22px;
+        background: rgba(20, 10, 36, 0.92); border: 2px solid rgba(166, 107, 255, 0.4);
+      }
+      .cbox img { width: 64px; height: 64px; border-radius: 50%; mix-blend-mode: screen; }
+      .cbox .in { position: relative; flex: 1; height: 72px; border-radius: 16px; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; padding: 0 26px; font-size: 36px; font-weight: 800; }
+      .cbox .ph { position: absolute; left: 26px; color: rgba(255, 255, 255, 0.4); font-weight: 600; }
+      .cbox .post { position: relative; padding: 18px 34px; border-radius: 14px; font-size: 32px; font-weight: 800; color: var(--violet-soft); background: rgba(139, 61, 255, 0.15); }
+      .cbox .post i { position: absolute; inset: 0; border-radius: 14px; background: var(--hl); box-shadow: 0 0 26px rgba(139, 61, 255, 0.7); }
+      .cbox .post span { position: relative; }
+      .caret { display: inline-block; width: 3px; height: 40px; margin-left: 4px; background: #fff; }
+
+      /* end card */
+      #s13 { flex-direction: row; gap: 90px; padding-top: 0; }
+      #s13 .logo { width: 600px; height: 600px; border-radius: 50%; box-shadow: 0 0 90px rgba(139, 61, 255, 0.55); }
+      #s13 .logo img { width: 600px; height: 600px; }
+      #s13 .info { display: flex; flex-direction: column; align-items: flex-start; gap: 34px; }
+      #s13 .pill {
+        display: flex; align-items: center; gap: 22px; padding: 26px 56px; border-radius: 70px;
+        background: linear-gradient(90deg, #8b3dff, #a66bff); font-size: 66px; font-weight: 900; letter-spacing: -0.01em;
+        box-shadow: 0 0 50px rgba(139, 61, 255, 0.6);
+      }
+      #s13 .pill svg { width: 66px; height: 66px; }
+      #s13 .mail {
+        display: flex; align-items: center; gap: 18px; padding: 20px 40px; border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04); border: 2px solid rgba(255, 255, 255, 0.14); font-size: 46px; font-weight: 700;
+      }
+      #s13 .mail svg { width: 44px; height: 44px; }
+      #s13 .tagline { font-size: 40px; font-weight: 800; letter-spacing: 0.42em; padding-left: 4px; }
+      #s13 .tagline b { color: var(--violet); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="39" data-width="1920" data-height="1080">
+      <!-- ===== persistent background ===== -->
+      <div id="bg">
+        <div class="glow"></div>
+        <div class="grid"></div>
+        <svg id="rings" viewBox="0 0 1920 1080">
+          <defs>
+            <linearGradient id="arcg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#d9c2ff" />
+              <stop offset="1" stop-color="#8b3dff" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <circle cx="960" cy="540" r="650" fill="none" stroke="rgba(166,107,255,0.22)" stroke-width="2" />
+          <circle cx="960" cy="540" r="490" fill="none" stroke="rgba(166,107,255,0.16)" stroke-width="2" />
+          <g id="arcOuter"><circle cx="960" cy="540" r="650" fill="none" stroke="url(#arcg)" stroke-width="3" stroke-dasharray="1100 3000" stroke-linecap="round" /></g>
+          <g id="arcInner"><circle cx="960" cy="540" r="490" fill="none" stroke="url(#arcg)" stroke-width="2.5" stroke-dasharray="700 2400" stroke-linecap="round" /></g>
+        </svg>
+      </div>
+
+      <!-- ===== S1 hook ===== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="1.83" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="0">kya</span><span class="w" data-t="0.25">hi</span></div>
+        <div class="line xl"><span class="big" data-t="0.3">E-COMMERCE</span></div>
+        <div class="line md" style="color: #fff"><span class="w" data-t="0.95">brand</span><span class="w" data-t="1.12">banaoge?</span></div>
+      </div>
+      <div id="tag" class="clip" data-start="0" data-duration="1.83" data-track-index="5">3 FREE E-COM TOOLS</div>
+
+      <!-- ===== S2 ===== -->
+      <div id="s2" class="clip scene" data-start="1.83" data-duration="2.24" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="2.0">Agar</span><span class="w" data-t="2.2">yeh</span></div>
+        <div style="display: flex; align-items: center; gap: 30px; margin-top: 6px">
+          <span class="big" data-t="2.38" style="font-size: 250px; font-weight: 900; line-height: 0.9">3</span>
+          <div style="display: flex; flex-direction: column; align-items: flex-start">
+            <span class="w md" data-t="2.45" style="font-size: 104px">EXTENSIONS</span>
+            <div class="line sm" style="justify-content: flex-start"><span class="w" data-t="3.0">hi</span><span class="w" data-t="3.15">use</span><span class="w" data-t="3.27">nahi</span><span class="w" data-t="3.5">ki?</span></div>
+          </div>
+        </div>
+        <div class="icons">
+          <div class="tile pop" data-t="2.5"><svg viewBox="0 0 64 64"><use href="#i-puzzle" /></svg></div>
+          <div class="tile pop" data-t="2.6"><svg viewBox="0 0 64 64"><use href="#i-calc" /></svg></div>
+          <div class="tile pop" data-t="2.7"><svg viewBox="0 0 64 64"><use href="#i-search" /></svg></div>
+        </div>
+      </div>
+
+      <!-- ===== S3 ===== -->
+      <div id="s3" class="clip scene" data-start="4.07" data-duration="3.2" data-track-index="1">
+        <div class="line sm"><span class="acc" data-t="4.2">kyunki</span><span class="w" data-t="4.7">yeh</span><span class="w" data-t="4.95">tools</span><span class="w" data-t="5.2">tumhe</span></div>
+        <div class="line" style="align-items: baseline; margin-top: 8px">
+          <span class="w md" data-t="5.55" style="font-size: 104px">BEGINNER</span>
+          <span class="w sm dim" data-t="6.0">se</span>
+          <span class="big xl" data-t="6.35" style="font-size: 150px">PRO</span>
+        </div>
+        <div class="line sm"><span class="w" data-t="6.5">bana</span><span class="w" data-t="6.75">denge</span></div>
+        <div class="meter" data-t="5.5">
+          <span class="lab">BEGINNER</span>
+          <span class="track"><i class="fill" data-fill="5.7" data-fill-dur="0.75"></i></span>
+          <span class="lab v">PRO</span>
+        </div>
+      </div>
+
+      <!-- ===== S4 ===== -->
+      <div id="s4" class="clip scene" data-start="7.27" data-duration="3.56" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="7.45">aur</span><span class="w" data-t="7.7">tumhare</span></div>
+        <div class="line xl"><span class="big" data-t="8.0">COMPETITORS</span></div>
+        <div class="line md" style="font-size: 70px; align-items: center; margin-top: 10px">
+          <span class="w sm" data-t="8.5">ka</span><span class="w sm" data-t="8.7">saara</span><span class="hl" data-t="9.0">DATA</span>
+        </div>
+        <div class="line sm" style="margin-top: 6px"><span class="w" data-t="9.2">tumhare</span><span class="w" data-t="9.7">saamne</span><span class="w" data-t="10.0">rakh</span><span class="w" data-t="10.25">denge</span></div>
+        <div class="bars">
+          <i class="bar" data-t="9.05" style="height: 70px"></i><i class="bar" data-t="9.12" style="height: 120px"></i><i class="bar" data-t="9.19" style="height: 95px"></i><i class="bar" data-t="9.26" style="height: 160px"></i><i class="bar" data-t="9.33" style="height: 190px"></i><i class="bar" data-t="9.4" style="height: 230px"></i>
+        </div>
+      </div>
+
+      <!-- ===== S5 tool 1 ===== -->
+      <div id="s5" class="clip scene" data-start="10.83" data-duration="2.94" data-track-index="1">
+        <div class="line md"><span class="w" style="color: #fff" data-t="11.0">Pehla</span><span class="acc" data-t="11.22">hai</span></div>
+        <div class="card" data-t="11.75">
+          <span class="num">#1</span>
+          <span class="ic"><svg viewBox="0 0 64 64"><use href="#i-puzzle" /></svg></span>
+          <div><div class="t">Free Trendtrack Chrome<br />Extension</div><div class="s">FREE · CHROME EXTENSION</div></div>
+        </div>
+      </div>
+
+      <!-- ===== S6 ===== -->
+      <div id="s6" class="clip scene" data-start="13.77" data-duration="5.5" data-track-index="1">
+        <div class="line sm" style="font-size: 66px"><span class="w" data-t="14.0">Yeh</span><span class="acc" data-t="14.2">competitors</span><span class="w" data-t="14.7">ke</span><span class="w" data-t="15.0">saare</span></div>
+        <div class="chips">
+          <div class="chip" data-t="15.27" data-active-until="16.0"><span class="ring"></span><em>01</em>BEST SELLERS</div>
+          <div class="chip" data-t="16.0" data-active-until="16.95"><span class="ring"></span><em>02</em>TRAFFIC SOURCE</div>
+          <div class="chip" data-t="16.95" data-active-until="17.7"><span class="ring"></span><em>03</em>THEME</div>
+        </div>
+        <div class="line md" style="align-items: center; margin-top: 54px">
+          <span class="hl" data-t="17.7" style="font-size: 96px">INFORMATION</span>
+          <span class="w sm" data-t="18.2">tumhe</span><span class="w sm" data-t="18.55">de</span><span class="w sm" data-t="18.7">dega</span>
+        </div>
+      </div>
+
+      <!-- ===== S7 tool 2 ===== -->
+      <div id="s7" class="clip scene" data-start="19.27" data-duration="2.6" data-track-index="1">
+        <div class="line md"><span class="w" style="color: #fff" data-t="19.45">Doosra</span><span class="acc" data-t="19.7">hai</span></div>
+        <div class="card" data-t="20.25" style="margin-top: 36px">
+          <span class="num">#2</span>
+          <span class="ic"><svg viewBox="0 0 64 64"><use href="#i-calc" /></svg></span>
+          <div><div class="t">E-Commerce Profit<br />Calculator</div><div class="s">COST → PRICE → PROFIT</div></div>
+        </div>
+        <div class="calc" data-t="20.6">
+          <div class="r w" data-t="20.7"><span>Product cost</span><b>₹450</b></div>
+          <div class="r w" data-t="20.85"><span>Selling price</span><b>₹1,199</b></div>
+          <div class="r w" data-t="21.0"><span>Shipping + fees</span><b>₹260</b></div>
+          <div class="r p w" data-t="21.18"><span>Profit</span><b>₹489</b></div>
+        </div>
+      </div>
+
+      <!-- ===== S8 ===== -->
+      <div id="s8" class="clip scene" data-start="21.87" data-duration="4.36" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="22.0">Yeh</span><span class="w" data-t="22.2">tumhe</span><span class="big md" data-t="22.5">product</span></div>
+        <div class="line sm"><span class="w" data-t="22.95">add</span><span class="w" data-t="23.2">karne</span><span class="w" data-t="23.4">se</span></div>
+        <div class="line md" style="align-items: center; margin-top: 10px">
+          <span class="hl" data-t="23.6">PEHLE</span><span class="hl" data-t="23.85">HI</span><span class="w sm" data-t="24.0">bata</span><span class="w sm" data-t="24.2">dega</span>
+        </div>
+        <div class="line md" style="margin-top: 10px">
+          <span class="w sm" data-t="24.4">ki</span><span class="w sm" data-t="24.65">kitna</span><span class="big" data-t="24.95">PROFIT</span><span class="big" data-t="25.25">MARGIN</span><span class="w sm" data-t="25.65">banega</span>
+        </div>
+        <div class="meter" data-t="24.8" style="margin-top: 44px">
+          <span class="lab">COST</span>
+          <span class="track"><i class="fill" data-fill="24.95" data-fill-dur="0.8" data-fill-to="0.72"></i></span>
+          <span class="lab v w" data-t="25.7">MARGIN ✓</span>
+        </div>
+      </div>
+
+      <!-- ===== S9 tool 3 ===== -->
+      <div id="s9" class="clip scene" data-start="26.23" data-duration="2.07" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="26.45">Aur</span></div>
+        <div class="line"><span class="big xl" data-t="26.7" style="font-size: 150px">3RD</span><span class="w md" data-t="26.95">hai</span></div>
+        <div class="line sm"><span class="w" data-t="27.35">is</span><span class="w" data-t="27.5">tool</span><span class="w" data-t="27.7">ki</span><span class="w" data-t="27.95">help</span></div>
+        <div class="card" data-t="27.4" style="margin-top: 36px">
+          <span class="num">#3</span>
+          <span class="ic"><svg viewBox="0 0 64 64"><use href="#i-search" /></svg></span>
+          <div><div class="t">Winning-ads spy tool</div><div class="s">SEE WHAT YOUR COMPETITORS RUN</div></div>
+        </div>
+      </div>
+
+      <!-- ===== S10 ===== -->
+      <div id="s10" class="clip scene" data-start="28.3" data-duration="3.03" data-track-index="1">
+        <div class="ad adcard" data-t="29.55" style="left: 60px">
+          <div class="hd"><span class="av"></span><div style="flex: 1"><div class="ln" style="width: 70%"></div><div class="spons">Sponsored</div></div></div>
+          <div class="img" style="background: linear-gradient(135deg, #6d28d9, #c084fc 60%, #f0abfc)"></div>
+          <div class="cta">SHOP NOW</div>
+        </div>
+        <div class="ad adcard" data-t="29.7" style="right: 60px">
+          <div class="hd"><span class="av" style="background: linear-gradient(135deg, #f97316, #ef4444)"></span><div style="flex: 1"><div class="ln" style="width: 60%"></div><div class="spons">Sponsored</div></div></div>
+          <div class="img" style="background: linear-gradient(135deg, #7f1d1d, #f43f5e 60%, #fda4af)"></div>
+          <div class="cta">SHOP NOW</div>
+        </div>
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center">
+          <div class="line sm"><span class="w" data-t="28.5">tum</span><span class="w" data-t="28.7">apne</span></div>
+          <div class="line"><span class="big xl" data-t="28.87" style="font-size: 150px">COMPETITOR</span><span class="w sm" data-t="29.35">ke</span></div>
+          <div class="line md" style="font-size: 92px; margin-top: 8px"><span class="hl" data-t="29.55">WINNING</span><span class="hl" data-t="29.95">ADS</span></div>
+          <div class="line" style="margin-top: 10px"><span class="big md" data-t="30.2">SPY</span><span class="w sm" data-t="30.45">kar</span><span class="w sm" data-t="30.7">sakte</span><span class="w sm" data-t="30.95">ho</span></div>
+        </div>
+      </div>
+
+      <!-- ===== S11 ===== -->
+      <div id="s11" class="clip scene" data-start="31.33" data-duration="1.77" data-track-index="1">
+        <div class="line sm"><span class="w" data-t="31.5">Aur</span><span class="w" data-t="31.7">in</span><span class="w" data-t="31.8">teeno</span></div>
+        <div class="line" style="align-items: center"><span class="big xl" data-t="31.98" style="font-size: 140px">TOOLS</span><span class="w sm" data-t="32.15">ka</span><span class="hl xl" data-t="32.25" style="font-size: 120px">LINK</span></div>
+        <div class="line md"><span class="w" data-t="32.5">chahiye?</span></div>
+        <div class="icons">
+          <div class="tile pop" data-t="32.0"><svg viewBox="0 0 64 64"><use href="#i-puzzle" /></svg></div>
+          <div class="tile pop" data-t="32.12"><svg viewBox="0 0 64 64"><use href="#i-calc" /></svg></div>
+          <div class="tile pop" data-t="32.24"><svg viewBox="0 0 64 64"><use href="#i-search" /></svg></div>
+        </div>
+      </div>
+
+      <!-- ===== S12 CTA ===== -->
+      <div id="s12" class="clip scene" data-start="33.1" data-duration="3.2" data-track-index="1">
+        <div class="line md" style="font-size: 76px"><span class="w sm" data-t="33.25">Toh</span><span class="w" data-t="33.45">comment</span><span class="w" data-t="33.7">karo</span></div>
+        <div class="line xl" style="font-size: 200px"><span class="big" data-t="33.98">“TOOLS”</span></div>
+        <div class="cbox" data-t="34.15">
+          <img src="assets/img/gx-mark.png" alt="" />
+          <div class="in">
+            <span class="ph" data-hide="34.45">Add a comment…</span>
+            <span class="key" data-t="34.45">T</span><span class="key" data-t="34.52">O</span><span class="key" data-t="34.59">O</span><span class="key" data-t="34.66">L</span><span class="key" data-t="34.73">S</span><span class="caret"></span>
+          </div>
+          <div class="post"><i data-t="34.85"></i><span>Post</span></div>
+        </div>
+        <div class="line sm" style="margin-top: 34px; font-size: 52px">
+          <span class="w" data-t="34.75">aur</span><span class="w" data-t="34.85">link</span><span class="w" data-t="35.0">seedha</span><span class="w" data-t="35.4">aapke</span><span class="hl" data-t="35.7">DM</span><span class="w" data-t="35.9">mein</span>
+        </div>
+      </div>
+
+      <!-- ===== S13 end card ===== -->
+      <div id="s13" class="clip scene" data-start="36.3" data-duration="2.7" data-track-index="1">
+        <div class="logo pop" data-t="36.4"><img src="assets/img/gx-logo-badge.png" alt="The GrowthX Studio" /></div>
+        <div class="info">
+          <div class="pill w" data-t="36.7">COMMENT “TOOLS” <svg viewBox="0 0 64 64"><use href="#i-chat" /></svg></div>
+          <div class="mail w" data-t="37.0"><svg viewBox="0 0 64 64"><use href="#i-mail" /></svg>thegrowthxstudio@gmail.com</div>
+          <div class="tagline w" data-t="37.2">BUILD <b>•</b> GROW <b>•</b> SCALE</div>
+        </div>
+      </div>
+
+      <!-- ===== chrome (above scenes) ===== -->
+      <div id="wipe"></div>
+      <div id="brand" class="clip" data-start="0" data-duration="36.3" data-track-index="5">
+        <img src="assets/img/gx-mark.png" alt="" /><span>THE GROWTH<b>X</b> STUDIO</span>
+      </div>
+      <div id="progress"><i></i></div>
+
+      <audio id="a-roll-audio" src="audio.m4a" data-start="0" data-duration="39" data-track-index="2" data-volume="1"></audio>
+
+      <!-- icon symbols -->
+      <svg width="0" height="0" style="position: absolute">
+        <defs>
+          <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3d1ff" /><stop offset="1" stop-color="#9b5cff" /></linearGradient>
+          <symbol id="i-puzzle" viewBox="0 0 64 64">
+            <path fill="url(#ig)" transform="translate(0.5 -2.5)" d="M6 16H21a7 7 0 1 1 14 0H50V31a7 7 0 1 1 0 14V60H35a7 7 0 1 0-14 0H6V45a7 7 0 1 0 0-14z" />
+          </symbol>
+          <symbol id="i-calc" viewBox="0 0 64 64">
+            <rect x="12" y="6" width="40" height="52" rx="7" fill="url(#ig)" />
+            <rect x="18" y="12" width="28" height="12" rx="3" fill="#1b0d33" />
+            <g fill="#1b0d33"><circle cx="22" cy="33" r="3.2" /><circle cx="32" cy="33" r="3.2" /><circle cx="42" cy="33" r="3.2" /><circle cx="22" cy="43" r="3.2" /><circle cx="32" cy="43" r="3.2" /><circle cx="42" cy="43" r="3.2" /><circle cx="22" cy="52" r="3.2" /><rect x="29" y="49" width="16" height="6.4" rx="3.2" /></g>
+          </symbol>
+          <symbol id="i-search" viewBox="0 0 64 64">
+            <circle cx="27" cy="27" r="16" fill="none" stroke="url(#ig)" stroke-width="7" />
+            <path d="M39 39l14 14" stroke="url(#ig)" stroke-width="8" stroke-linecap="round" />
+          </symbol>
+          <symbol id="i-chat" viewBox="0 0 64 64">
+            <path fill="#fff" d="M32 8C17 8 6 17.5 6 29.5c0 6.6 3.4 12.4 8.8 16.4L12 56l12-6.4c2.5.6 5.2.9 8 .9 15 0 26-9.5 26-21S47 8 32 8z" />
+            <g fill="#8b3dff"><circle cx="21" cy="29.5" r="4" /><circle cx="32" cy="29.5" r="4" /><circle cx="43" cy="29.5" r="4" /></g>
+          </symbol>
+          <symbol id="i-mail" viewBox="0 0 64 64">
+            <rect x="6" y="14" width="52" height="36" rx="6" fill="none" stroke="#b98cff" stroke-width="5" />
+            <path d="M9 18l23 17 23-17" fill="none" stroke="#b98cff" stroke-width="5" stroke-linejoin="round" />
+          </symbol>
+        </defs>
+      </svg>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const q = (s) => Array.from(document.querySelectorAll(s));
+      const at = (el) => parseFloat(el.dataset.t);
+
+      // background motion
+      tl.fromTo("#arcOuter", { rotation: 0, svgOrigin: "960 540" }, { rotation: 140, svgOrigin: "960 540", duration: 39, ease: "none" }, 0);
+      tl.fromTo("#arcInner", { rotation: 200, svgOrigin: "960 540" }, { rotation: 20, svgOrigin: "960 540", duration: 39, ease: "none" }, 0);
+      tl.fromTo("#progress i", { scaleX: 0 }, { scaleX: 1, duration: 39, ease: "none" }, 0);
+
+      // word-level reveals: every word is laid out from frame one, so lines never re-centre
+      q(".w, .acc").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 22, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.24, ease: "power2.out" }, at(el));
+      });
+      q(".big").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 1.22, filter: "blur(18px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }, at(el));
+      });
+      q(".hl").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.2)" }, at(el));
+      });
+      q(".pop").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, at(el));
+      });
+      q(".card, .cbox, .calc, .meter").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power3.out" }, at(el));
+      });
+      q(".bar").forEach((el) => {
+        tl.fromTo(el, { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.out" }, at(el));
+      });
+      q(".adcard").forEach((el, i) => {
+        const r = i === 0 ? -9 : 9;
+        tl.fromTo(el, { opacity: 0, y: 120, rotation: 0 }, { opacity: 0.85, y: 0, rotation: r, duration: 0.4, ease: "power3.out" }, at(el));
+      });
+      q(".chip").forEach((el) => {
+        const ring = el.querySelector(".ring");
+        tl.fromTo(el, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }, at(el));
+        tl.fromTo(ring, { opacity: 1 }, { opacity: 0, duration: 0.25 }, parseFloat(el.dataset.activeUntil));
+      });
+      q(".key").forEach((el) => tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at(el)));
+      q("[data-hide]").forEach((el) => tl.to(el, { opacity: 0, duration: 0.01 }, parseFloat(el.dataset.hide)));
+      q(".post i").forEach((el) => tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at(el)));
+      q(".post span").forEach((el) => tl.to(el, { color: "#ffffff", duration: 0.15 }, 34.85));
+      q(".fill").forEach((el) => {
+        tl.fromTo(el, { scaleX: 0 }, { scaleX: parseFloat(el.dataset.fillTo || 1), duration: parseFloat(el.dataset.fillDur), ease: "power2.inOut" }, parseFloat(el.dataset.fill));
+      });
+
+      // caret blink, deterministic
+      for (let t = 34.15; t < 36.3; t += 0.5) {
+        tl.set(".caret", { opacity: 1 }, t);
+        tl.set(".caret", { opacity: 0 }, t + 0.25);
+      }
+
+      // diagonal wipe on every cut: panel covers the frame as the scenes swap underneath
+      [1.83, 4.07, 7.27, 10.83, 13.77, 19.27, 21.87, 26.23, 28.3, 31.33, 33.1, 36.3].forEach((b) => {
+        tl.fromTo("#wipe", { x: -2200, skewX: -18 }, { x: 2600, skewX: -18, duration: 0.36, ease: "power1.inOut", immediateRender: false }, b - 0.18);
+      });
+      tl.set("#wipe", { x: -2200, skewX: -18 }, 0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
