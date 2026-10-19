@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 500; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-SemiBold.otf"); font-weight: 600; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Bold.otf"); font-weight: 700; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-ExtraBold.otf"); font-weight: 800; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Black.otf"); font-weight: 900; }
+
+      /* GrowthX dark theme (same tokens as the ecom-tools reel) */
+      :root {
+        --bg: #06040a;
+        --ink: #f5f0ff;
+        --soft: #d6cbef;
+        --muted: #9d8fc0;
+        --violet: #a66bff;
+        --violet-soft: #c9a6ff;
+        --hl: #8b3dff;
+        --glow: 0 0 34px rgba(150, 80, 255, 0.55), 0 0 10px rgba(150, 80, 255, 0.35);
+        --card: linear-gradient(180deg, rgba(36, 16, 66, 0.94), rgba(16, 8, 30, 0.94));
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      body { font-family: "InterHF", "Inter", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+      /* ---------- background ---------- */
+      #bg { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+      #bg .glow { position: absolute; inset: 0; background: radial-gradient(ellipse 46% 52% at 50% 52%, rgba(96, 34, 170, 0.5) 0%, rgba(50, 16, 92, 0.28) 45%, rgba(6, 4, 10, 0) 75%); }
+      #bg .grid {
+        position: absolute; inset: 0;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+        background-size: 64px 64px;
+      }
+      #ctaGlow { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 55% 60% at 72% 22%, rgba(139, 61, 255, 0.55) 0%, rgba(70, 20, 140, 0.35) 45%, rgba(6, 4, 10, 0) 80%); }
+      #rings { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+      /* ---------- chrome ---------- */
+      #corner { position: absolute; left: 35px; bottom: 30px; width: 64px; height: 64px; border-radius: 50%; z-index: 50; box-shadow: 0 0 22px rgba(139, 61, 255, 0.55); }
+      #corner img { width: 64px; height: 64px; }
+      #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; background: rgba(255, 255, 255, 0.06); z-index: 50; }
+      #progress i { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, #6d28d9, #a855f7); box-shadow: 0 0 18px rgba(168, 85, 247, 0.8); }
+
+      /* ---------- scenes ---------- */
+      .scene { position: absolute; inset: 0; z-index: 10; }
+      .abs { position: absolute; }
+      .ghost { position: absolute; top: 250px; left: -40px; font-size: 600px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.82; white-space: nowrap; color: rgba(166, 107, 255, 0.075); }
+      .script { font-size: 54px; font-weight: 700; color: var(--soft); white-space: nowrap; letter-spacing: -0.01em; }
+      .disp { font-weight: 900; letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
+      .v { color: var(--violet); text-shadow: var(--glow); }
+      .wht { color: var(--ink); }
+      .ch { display: none; }
+
+      .pill { padding: 10px 22px; border-radius: 18px; font-size: 34px; font-weight: 900; color: #fff; background: var(--hl); box-shadow: 0 6px 0 rgba(90, 30, 190, 0.8), 0 0 26px rgba(139, 61, 255, 0.5); }
+      .tile {
+        width: 124px; height: 124px; border-radius: 28px; display: grid; place-items: center;
+        font-size: 74px; font-weight: 900; color: #fff;
+        box-shadow: 0 7px 0 rgba(0, 0, 0, 0.45), 0 0 34px rgba(139, 61, 255, 0.35);
+      }
+      .g { background: #1f9d6a; } .o { background: #f26b1d; } .p { background: #7c3aed; } .b { background: #2563eb; }
+
+      .card {
+        position: absolute; border-radius: 26px; padding: 34px 36px;
+        background: var(--card); border: 2px solid rgba(166, 107, 255, 0.55);
+        box-shadow: 0 12px 0 rgba(124, 44, 255, 0.35), 0 0 50px rgba(139, 61, 255, 0.28);
+      }
+      .card h4 { font-size: 32px; font-weight: 800; letter-spacing: -0.01em; }
+      .tag { position: absolute; top: 30px; right: 34px; padding: 6px 16px; border-radius: 16px; font-size: 22px; font-weight: 800; color: #fff; }
+      .lab { font-size: 20px; font-weight: 800; letter-spacing: 0.14em; color: var(--muted); margin-top: 18px; }
+      .field { margin-top: 12px; height: 70px; border-radius: 14px; padding: 0 22px; display: flex; align-items: center; font-size: 32px; font-weight: 600; background: rgba(0, 0, 0, 0.38); border: 2px solid rgba(255, 255, 255, 0.12); white-space: nowrap; }
+      .caret { display: inline-block; width: 3px; height: 38px; margin-left: 3px; background: var(--violet); }
+      .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+      .chip { padding: 8px 18px; border-radius: 14px; font-size: 26px; font-weight: 700; color: var(--violet-soft); background: rgba(139, 61, 255, 0.2); border: 1px solid rgba(166, 107, 255, 0.35); }
+
+      .rows { margin-top: 14px; display: flex; flex-direction: column; gap: 16px; }
+      .row { display: flex; align-items: center; gap: 18px; font-size: 32px; font-weight: 700; }
+      .ck { position: relative; width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.28); flex: none; }
+      .ck i { position: absolute; inset: -2px; border-radius: 50%; background: var(--hl); box-shadow: 0 0 16px rgba(139, 61, 255, 0.7); display: grid; place-items: center; }
+      .ck svg { width: 22px; height: 22px; }
+
+      .irow { display: flex; align-items: center; justify-content: space-between; font-size: 26px; font-weight: 700; height: 42px; }
+      .irow .bar { width: 240px; height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; margin-left: auto; margin-right: 22px; }
+      .irow .bar i { position: absolute; inset: 0; transform-origin: 0 50%; border-radius: 7px; background: linear-gradient(90deg, #7c2cff, #c9a6ff); }
+      .irow b { width: 72px; text-align: right; color: var(--violet-soft); font-weight: 800; }
+
+      .vbars { display: flex; align-items: flex-end; gap: 26px; height: 130px; margin-top: 10px; }
+      .vbars div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+      .vbars i { display: block; width: 100%; border-radius: 8px 8px 2px 2px; transform-origin: 50% 100%; }
+      .vbars span { margin-top: 8px; font-size: 20px; font-weight: 700; color: var(--muted); }
+
+      .ribbon { padding: 14px 30px; border-radius: 40px; font-size: 40px; font-weight: 800; color: #fff; background: var(--hl); box-shadow: 0 8px 0 rgba(90, 30, 190, 0.8), 0 0 30px rgba(139, 61, 255, 0.55); white-space: nowrap; }
+      .stamp { padding: 18px 30px; border: 5px solid #ff4d79; border-radius: 10px; font-size: 64px; font-weight: 900; letter-spacing: -0.02em; color: #ff4d79; background: rgba(40, 6, 20, 0.85); box-shadow: 0 0 34px rgba(255, 77, 121, 0.45); white-space: nowrap; }
+
+      .cbox { display: flex; align-items: center; gap: 22px; width: 840px; height: 100px; padding: 0 16px 0 18px; border-radius: 50px; background: rgba(20, 10, 36, 0.95); border: 2px solid rgba(166, 107, 255, 0.55); box-shadow: 0 10px 0 rgba(124, 44, 255, 0.35), 0 0 40px rgba(139, 61, 255, 0.35); }
+      .av { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: var(--hl); font-size: 32px; font-weight: 800; flex: none; }
+      .cbox .txt { position: relative; flex: 1; display: flex; align-items: center; font-size: 42px; font-weight: 800; color: var(--violet-soft); white-space: nowrap; }
+      .cbox .ph { position: absolute; left: 0; color: rgba(255, 255, 255, 0.38); font-weight: 600; font-size: 34px; }
+      .post { padding: 16px 30px; border-radius: 30px; font-size: 30px; font-weight: 800; background: var(--hl); }
+      .cta { padding: 14px 30px; border-radius: 40px; display: flex; align-items: center; gap: 16px; font-size: 46px; font-weight: 900; color: #fff; background: rgba(20, 10, 36, 0.95); border: 2px solid rgba(166, 107, 255, 0.7); box-shadow: 0 0 34px rgba(139, 61, 255, 0.5); white-space: nowrap; }
+      .cta b { color: var(--violet); text-shadow: var(--glow); }
+      .cta svg { width: 50px; height: 50px; }
+
+      .btn { flex: 1; height: 66px; border-radius: 16px; display: grid; place-items: center; font-size: 28px; font-weight: 800; position: relative; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="42.6" data-width="1920" data-height="1080">
+      <!-- ===== background ===== -->
+      <div id="bg">
+        <div class="glow"></div>
+        <div id="ctaGlow"></div>
+        <div class="grid"></div>
+        <svg id="rings" viewBox="0 0 1920 1080">
+          <defs>
+            <linearGradient id="arcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9c2ff" /><stop offset="1" stop-color="#8b3dff" stop-opacity="0" /></linearGradient>
+          </defs>
+          <circle cx="960" cy="540" r="650" fill="none" stroke="rgba(166,107,255,0.2)" stroke-width="2" />
+          <circle cx="960" cy="540" r="490" fill="none" stroke="rgba(166,107,255,0.14)" stroke-width="2" />
+          <g id="arcOuter"><circle cx="960" cy="540" r="650" fill="none" stroke="url(#arcg)" stroke-width="3" stroke-dasharray="1100 3000" stroke-linecap="round" /></g>
+          <g id="arcInner"><circle cx="960" cy="540" r="490" fill="none" stroke="url(#arcg)" stroke-width="2.5" stroke-dasharray="700 2400" stroke-linecap="round" /></g>
+        </svg>
+      </div>
+
+      <!-- ===== S1 hook ===== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="5.45" data-exit="5.2" data-track-index="1">
+        <div class="ghost" data-t="0.15">AUDIENCE</div>
+        <div class="abs script" style="left: 135px; top: 140px" data-type="0.45" data-dur="0.3">Bhai,</div>
+        <div class="abs disp v wipe" style="left: 128px; top: 215px; font-size: 150px" data-t="0.95">META ADS</div>
+        <div class="abs script" style="left: 138px; top: 420px" data-type="1.45" data-dur="0.25">mein sahi</div>
+        <div class="abs disp wht wipe" style="left: 128px; top: 495px; font-size: 172px" data-t="1.75">AUDIENCE</div>
+        <div class="abs script" style="left: 138px; top: 735px" data-type="2.2" data-dur="0.8">dhoondhna problem hai?</div>
+        <div class="abs tile g pop" style="left: 1165px; top: 190px" data-t="3.7">A</div>
+        <div class="abs tile o pop" style="left: 1340px; top: 190px" data-t="3.75">B</div>
+        <div class="abs tile p pop" style="left: 1165px; top: 365px" data-t="3.95">A</div>
+        <div class="abs tile b pop" style="left: 1340px; top: 365px" data-t="4.05">M</div>
+        <div class="abs disp wipe" style="left: 1165px; top: 560px; font-size: 112px" data-t="3.65"><span class="wht">4</span> <span class="v">WEBSITES</span></div>
+        <div class="abs ribbon pop" style="left: 1250px; top: 715px" data-t="4.7" data-rot="-3">Research EASY ✓</div>
+      </div>
+
+      <!-- ===== S2 AdGrow ===== -->
+      <div id="s2" class="clip scene" data-start="5.45" data-duration="5.5" data-exit="10.7" data-track-index="1">
+        <div class="ghost" data-t="5.6">ADGROW</div>
+        <div class="abs pill pop" style="left: 95px; top: 107px" data-t="5.45">#01</div>
+        <div class="abs script" style="left: 235px; top: 104px" data-type="5.5" data-dur="0.5">Number one</div>
+        <div class="abs tile g pop" style="left: 95px; top: 220px" data-t="6.15">A</div>
+        <div class="abs disp v wipe" style="left: 262px; top: 222px; font-size: 124px" data-t="6.2">AdGrow</div>
+        <div class="card rise" style="left: 97px; top: 470px; width: 718px" data-t="6.85">
+          <h4>Kis kaam aata hai?</h4><span class="tag g">AdGrow</span>
+          <div class="rows">
+            <div class="row" data-on="6.95"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Business ke hisaab se ideas</div>
+            <div class="row" data-on="9.25"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Audience targeting ideas</div>
+          </div>
+        </div>
+        <div class="card rise" style="left: 1030px; top: 205px; width: 790px" data-t="7.2" data-rot="1.2">
+          <h4>Audience ideas generator</h4><span class="tag g">Free</span>
+          <div class="lab">APNA BUSINESS</div>
+          <div class="field"><span data-type="7.55" data-dur="1.45">Fitness studio, Delhi</span><span class="caret blink"></span></div>
+          <div class="lab fade" data-t="9.25">TARGETING IDEAS</div>
+          <div class="chips">
+            <span class="chip pop" data-t="9.4">Yoga</span><span class="chip pop" data-t="9.5">Zumba</span><span class="chip pop" data-t="9.65">Healthy food</span><span class="chip pop" data-t="9.75">Fitness apps</span><span class="chip pop" data-t="9.9">Marathon</span><span class="chip pop" data-t="10.05">Weight loss</span><span class="chip pop" data-t="10.15">Gym wear</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S3 Boron ===== -->
+      <div id="s3" class="clip scene" data-start="10.95" data-duration="5.5" data-exit="16.2" data-track-index="1">
+        <div class="ghost" data-t="11.4">BORON</div>
+        <div class="abs pill pop" style="left: 95px; top: 107px" data-t="11.05">#02</div>
+        <div class="abs script" style="left: 235px; top: 104px" data-type="11.15" data-dur="0.45">Number two</div>
+        <div class="abs tile o pop" style="left: 95px; top: 220px" data-t="11.8">B</div>
+        <div class="abs disp v wipe" style="left: 262px; top: 222px; font-size: 124px" data-t="11.9">Boron</div>
+        <div class="card rise" style="left: 97px; top: 470px; width: 718px" data-t="12.45">
+          <h4>Kis kaam aata hai?</h4><span class="tag o">Boron</span>
+          <div class="rows">
+            <div class="row" data-on="12.7"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Business details daalo</div>
+            <div class="row" data-on="14.0"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Audience personas</div>
+            <div class="row" data-on="15.0"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Interest ideas explore</div>
+          </div>
+        </div>
+        <div class="card rise" style="left: 1020px; top: 215px; width: 810px" data-t="12.75" data-rot="-1.2">
+          <h4>Audience persona</h4><span class="tag o">AI</span>
+          <div class="lab">BUSINESS DETAILS</div>
+          <div class="field"><span data-type="13.0" data-dur="0.9">Fitness studio · Age 22–40 · Delhi</span><span class="caret blink"></span></div>
+          <div class="fade" data-t="14.0" style="display: flex; align-items: center; gap: 22px; margin-top: 22px">
+            <span class="av" style="width: 86px; height: 86px; font-size: 42px; background: #f26b1d">P</span>
+            <div><div style="font-size: 36px; font-weight: 800">Priya, 28</div><div style="font-size: 26px; font-weight: 600; color: var(--muted)">Working professional · Health-conscious</div></div>
+          </div>
+          <div class="lab fade" data-t="15.0">INTEREST IDEAS</div>
+          <div class="chips">
+            <span class="chip pop" data-t="15.25">Yoga</span><span class="chip pop" data-t="15.35">Fitbit</span><span class="chip pop" data-t="15.5">Healthy recipes</span><span class="chip pop" data-t="15.65">Meal prep</span><span class="chip pop" data-t="15.8">Marathon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S4 AdBurst ===== -->
+      <div id="s4" class="clip scene" data-start="16.45" data-duration="4.6" data-exit="20.8" data-track-index="1">
+        <div class="ghost" data-t="16.7">ADBURST</div>
+        <div class="abs pill pop" style="left: 95px; top: 107px" data-t="16.5">#03</div>
+        <div class="abs script" style="left: 235px; top: 104px" data-type="16.55" data-dur="0.55">Number three</div>
+        <div class="abs tile p pop" style="left: 95px; top: 220px" data-t="17.25">A</div>
+        <div class="abs disp v wipe" style="left: 262px; top: 222px; font-size: 124px" data-t="17.35">AdBurst</div>
+        <div class="card rise" style="left: 97px; top: 470px; width: 718px" data-t="17.9">
+          <h4>Kis kaam aata hai?</h4><span class="tag p">AdBurst</span>
+          <div class="rows">
+            <div class="row" data-on="18.25"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Meta ads interests</div>
+            <div class="row" data-on="19.6"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Targeting ideas research</div>
+          </div>
+        </div>
+        <div class="card rise" style="left: 1030px; top: 205px; width: 790px" data-t="18.2" data-rot="1.2">
+          <h4>Interest research</h4><span class="tag p">Audience size</span>
+          <div class="lab" style="display: flex; justify-content: space-between"><span>INTEREST</span><span>SIZE</span></div>
+          <div style="margin-top: 10px">
+            <div class="irow fade" data-t="18.5"><span>Physical fitness</span><span class="bar"><i class="fill" data-t="18.5" data-w="0.95"></i></span><b>42M</b></div>
+            <div class="irow fade" data-t="19.0"><span>CrossFit</span><span class="bar"><i class="fill" data-t="19.0" data-w="0.62"></i></span><b>18M</b></div>
+            <div class="irow fade" data-t="19.25"><span>Yoga Journal</span><span class="bar"><i class="fill" data-t="19.25" data-w="0.48"></i></span><b>12M</b></div>
+            <div class="irow fade" data-t="19.5"><span>Gym membership</span><span class="bar"><i class="fill" data-t="19.5" data-w="0.36"></i></span><b>9M</b></div>
+            <div class="irow fade" data-t="19.75"><span>Protein bar</span><span class="bar"><i class="fill" data-t="19.75" data-w="0.24"></i></span><b>6M</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S5 Meta Interest Finder ===== -->
+      <div id="s5" class="clip scene" data-start="21.05" data-duration="5.25" data-exit="26.05" data-track-index="1">
+        <div class="ghost" data-t="21.3">META</div>
+        <div class="abs pill pop" style="left: 95px; top: 107px" data-t="21.1">#04</div>
+        <div class="abs script" style="left: 235px; top: 104px" data-type="21.15" data-dur="0.6">Number four</div>
+        <div class="abs tile b pop" style="left: 95px; top: 220px" data-t="21.9">M</div>
+        <div class="abs disp v wipe" style="left: 262px; top: 244px; font-size: 74px" data-t="22.0">Meta Interest Finder</div>
+        <div class="card rise" style="left: 97px; top: 470px; width: 718px" data-t="22.9">
+          <h4>Kis kaam aata hai?</h4><span class="tag b">Interest Finder</span>
+          <div class="rows">
+            <div class="row" data-on="23.5"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Related interests search</div>
+            <div class="row" data-on="25.0"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Demographic ideas</div>
+          </div>
+        </div>
+        <div class="card rise" style="left: 1030px; top: 215px; width: 800px" data-t="22.6" data-rot="-1.2">
+          <h4>Interest Finder</h4><span class="tag b">Search</span>
+          <div class="field" style="margin-top: 18px"><span data-type="23.0" data-dur="0.4">Fitness</span><span class="caret blink"></span></div>
+          <div style="margin-top: 12px">
+            <div class="irow fade" data-t="23.75"><span>Fitness and wellness</span><b style="width: auto">128M</b></div>
+            <div class="irow fade" data-t="24.0"><span>Fitness boot camp</span><b style="width: auto">31M</b></div>
+            <div class="irow fade" data-t="24.2"><span>Fitness Blender</span><b style="width: auto">8M</b></div>
+          </div>
+          <div class="lab fade" data-t="24.9">DEMOGRAPHICS · AGE</div>
+          <div class="vbars">
+            <div><i class="vb" data-t="25.0" style="height: 45%; background: rgba(166, 107, 255, 0.45)"></i><span>18–24</span></div>
+            <div><i class="vb" data-t="25.1" style="height: 100%; background: linear-gradient(180deg, #b98cff, #7c2cff); box-shadow: 0 0 24px rgba(139, 61, 255, 0.6)"></i><span>25–34</span></div>
+            <div><i class="vb" data-t="25.2" style="height: 68%; background: rgba(166, 107, 255, 0.65)"></i><span>35–44</span></div>
+            <div><i class="vb" data-t="25.3" style="height: 26%; background: rgba(166, 107, 255, 0.3)"></i><span>45+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S6 Naye ideas ===== -->
+      <div id="s6" class="clip scene" data-start="26.3" data-duration="5.55" data-exit="31.6" data-track-index="1">
+        <div class="ghost" data-t="26.4">IDEAS</div>
+        <div class="abs script" style="left: 112px; top: 140px" data-type="26.45" data-dur="0.65">Bhai, in tools se</div>
+        <div class="abs disp v wipe" style="left: 108px; top: 222px; font-size: 140px" data-t="27.2">NAYE IDEAS</div>
+        <svg class="abs pop" data-t="27.3" style="left: 978px; top: 252px; width: 150px; height: 150px" viewBox="0 0 100 100"><path d="M50 0C53 30 70 47 100 50 70 53 53 70 50 100 47 70 30 53 0 50 30 47 47 30 50 0Z" fill="#a66bff" style="filter: drop-shadow(0 0 16px rgba(150, 80, 255, 0.8))" /></svg>
+        <div class="abs script" style="left: 118px; top: 470px" data-type="28.7" data-dur="0.6">bas final targeting</div>
+        <div class="abs disp wht wipe" style="left: 108px; top: 555px; font-size: 128px" data-t="29.45">ADS MANAGER</div>
+        <div class="abs script" style="left: 118px; top: 745px" data-type="29.9" data-dur="0.5">mein check karna</div>
+        <div class="abs stamp slam" style="left: 548px; top: 815px" data-t="30.7" data-rot="-5">MAT BHOOLNA!</div>
+        <div class="card rise" style="left: 1140px; top: 215px; width: 690px" data-t="28.75" data-rot="1.2">
+          <h4>Ads Manager · Audience</h4><span class="tag p">Final check</span>
+          <div class="rows" style="margin-top: 20px">
+            <div class="row" data-on="30.0"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Location: Delhi + 10 km</div>
+            <div class="row" data-on="30.25"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Age: 22–40</div>
+            <div class="row" data-on="30.5"><span class="ck"><i><svg viewBox="0 0 24 24"><use href="#i-check" /></svg></i></span>Interests: Yoga, Gym, Fitness</div>
+          </div>
+          <div class="lab">AUDIENCE DEFINITION</div>
+          <div style="position: relative; margin-top: 26px; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #f0607a 0 33%, #2fd08a 33% 66%, #f0607a 66%)">
+            <svg id="marker" viewBox="0 0 20 16" style="position: absolute; top: -22px; left: 0; width: 26px; height: 20px"><path d="M0 0H20L10 14Z" fill="#fff" /></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 20px; font-weight: 700; color: var(--muted)"><span>Specific</span><span>Broad</span></div>
+        </div>
+      </div>
+
+      <!-- ===== S7 CTA ===== -->
+      <div id="s7" class="clip scene" data-start="31.85" data-duration="4.8" data-exit="36.4" data-track-index="1">
+        <div class="abs script" style="left: 0; right: 0; top: 112px; text-align: center; font-size: 66px; color: #fff" data-type="32.0" data-dur="1.45">In 4 websites ke direct links chahiye?</div>
+        <div class="abs cbox rise" style="left: 180px; top: 397px" data-t="33.65">
+          <span class="av">Y</span>
+          <span class="txt"><span class="ph" data-hide="34.15">Add a comment…</span><span data-type="34.2" data-dur="0.6">AUDIENCE</span><span class="caret blink"></span></span>
+          <span class="post">Post</span>
+        </div>
+        <div class="card rise" style="left: 1142px; top: 288px; width: 620px; padding: 28px 30px" data-t="35.4" data-rot="1.5">
+          <div style="display: flex; align-items: center; gap: 16px">
+            <img src="assets/img/gx-logo-badge.png" alt="" style="width: 62px; height: 62px; border-radius: 50%" />
+            <div><div style="font-size: 30px; font-weight: 800">thegrowthxstudio</div><div style="font-size: 22px; font-weight: 600; color: var(--muted)">Active now</div></div>
+          </div>
+          <div class="fade" data-t="35.9" style="margin-top: 22px; padding: 16px 20px; border-radius: 16px; background: rgba(139, 61, 255, 0.22); font-size: 28px; font-weight: 700">Ye lo 4 websites ke links! 🔗</div>
+          <div class="fade" data-t="36.05" style="margin-top: 14px; display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.12)">
+            <span style="width: 52px; height: 52px; border-radius: 10px; background: #e53e5a; display: grid; place-items: center; font-size: 18px; font-weight: 800">PDF</span>
+            <div><div style="font-size: 26px; font-weight: 800">Audience_Research_Tools.pdf</div><div style="font-size: 20px; color: var(--muted); font-weight: 600">4 links · Tap to open</div></div>
+          </div>
+        </div>
+        <div class="abs" style="left: 0; right: 0; top: 940px; display: flex; justify-content: center">
+          <div class="cta rise" data-t="34.2">Comment <b>“AUDIENCE”</b> <svg viewBox="0 0 64 64"><use href="#i-chat" /></svg></div>
+        </div>
+      </div>
+
+      <!-- ===== S8 Follow ===== -->
+      <div id="s8" class="clip scene" data-start="36.65" data-duration="5.95" data-track-index="1">
+        <div class="ghost" data-t="36.75">FOLLOW</div>
+        <div class="abs script" style="left: 108px; top: 178px" data-type="36.9" data-dur="1.6">Aise hi practical marketing hacks ke liye</div>
+        <div class="abs disp v wipe" style="left: 104px; top: 270px; font-size: 220px" data-t="38.9">FOLLOW</div>
+        <div class="abs disp wht" style="left: 108px; top: 548px; font-size: 104px" data-type="39.9" data-dur="0.6">@thegrowthxstudio</div>
+        <div class="card rise" style="left: 1190px; top: 235px; width: 620px; padding: 40px 34px 34px; text-align: center" data-t="38.15" data-rot="1.5">
+          <img src="assets/img/gx-logo-badge.png" alt="The GrowthX Studio" style="width: 224px; height: 224px; border-radius: 50%; box-shadow: 0 0 40px rgba(139, 61, 255, 0.55)" />
+          <div style="margin-top: 16px; font-size: 38px; font-weight: 800">thegrowthxstudio</div>
+          <div style="margin-top: 6px; font-size: 24px; font-weight: 600; color: var(--muted)">The GrowthX Studio · Build • Grow • Scale</div>
+          <div style="display: flex; gap: 16px; margin-top: 24px">
+            <div class="btn" style="background: var(--hl); box-shadow: 0 0 22px rgba(139, 61, 255, 0.6)">
+              <span id="followA">Follow</span>
+              <span id="followB" style="position: absolute; inset: 0; display: grid; place-items: center; border-radius: 16px; background: rgba(255, 255, 255, 0.1); color: var(--soft)">Following ✓</span>
+            </div>
+            <div class="btn" style="background: rgba(255, 255, 255, 0.1)">Message</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== chrome ===== -->
+      <div id="corner"><img src="assets/img/gx-logo-badge.png" alt="" /></div>
+      <div id="progress"><i></i></div>
+
+      <audio id="a-roll-audio" src="audio.m4a" data-start="0" data-duration="42.6" data-track-index="2" data-volume="1"></audio>
+
+      <svg width="0" height="0" style="position: absolute">
+        <defs>
+          <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+          <symbol id="i-chat" viewBox="0 0 64 64">
+            <path fill="#fff" d="M32 8C17 8 6 17.5 6 29.5c0 6.6 3.4 12.4 8.8 16.4L12 56l12-6.4c2.5.6 5.2.9 8 .9 15 0 26-9.5 26-21S47 8 32 8z" />
+            <g fill="#8b3dff"><circle cx="21" cy="29.5" r="4" /><circle cx="32" cy="29.5" r="4" /><circle cx="43" cy="29.5" r="4" /></g>
+          </symbol>
+        </defs>
+      </svg>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const q = (s) => Array.from(document.querySelectorAll(s));
+      const num = (el, k) => parseFloat(el.dataset[k]);
+      const rot = (el) => parseFloat(el.dataset.rot || 0);
+      const END = 42.6;
+
+      // background motion
+      tl.fromTo("#arcOuter", { rotation: 0, svgOrigin: "960 540" }, { rotation: 150, svgOrigin: "960 540", duration: END, ease: "none" }, 0);
+      tl.fromTo("#arcInner", { rotation: 200, svgOrigin: "960 540" }, { rotation: 10, svgOrigin: "960 540", duration: END, ease: "none" }, 0);
+      tl.fromTo("#progress i", { scaleX: 0 }, { scaleX: 1, duration: END, ease: "none" }, 0);
+      tl.fromTo("#ctaGlow", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 31.75);
+      tl.to("#ctaGlow", { opacity: 0, duration: 0.3 }, 36.45);
+
+      // typewriter: split into characters and switch each on at its moment, so carets follow the text
+      q("[data-type]").forEach((el) => {
+        const text = el.textContent;
+        el.textContent = "";
+        const t0 = num(el, "type");
+        const step = num(el, "dur") / text.length;
+        Array.from(text).forEach((c, i) => {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c;
+          el.appendChild(s);
+          tl.set(s, { display: "inline" }, t0 + i * step);
+        });
+      });
+
+      q(".ghost").forEach((el) => {
+        const t = num(el, "t");
+        tl.fromTo(el, { opacity: 0, x: 80, filter: "blur(16px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.5, ease: "power2.out" }, t);
+        tl.to(el, { x: -70, duration: 5, ease: "none" }, t + 0.5);
+      });
+      q(".wipe").forEach((el) => {
+        tl.fromTo(el, { clipPath: "inset(-20% 100% -20% 0%)" }, { clipPath: "inset(-20% -5% -20% 0%)", duration: 0.32, ease: "power2.out" }, num(el, "t"));
+      });
+      q(".pop").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 0.5, rotation: rot(el) }, { opacity: 1, scale: 1, rotation: rot(el), duration: 0.28, ease: "back.out(2)" }, num(el, "t"));
+      });
+      q(".rise").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 46, rotation: rot(el), filter: "blur(12px)" }, { opacity: 1, y: 0, rotation: rot(el), filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, num(el, "t"));
+      });
+      q(".fade").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }, num(el, "t"));
+      });
+      q(".slam").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 1.8, rotation: rot(el) - 6 }, { opacity: 1, scale: 1, rotation: rot(el), duration: 0.3, ease: "back.out(1.6)" }, num(el, "t"));
+      });
+      q(".row").forEach((el) => {
+        const t = num(el, "on");
+        tl.fromTo(el, { opacity: 0.38 }, { opacity: 1, duration: 0.2 }, t);
+        tl.fromTo(el.querySelector(".ck i"), { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(2.5)" }, t);
+      });
+      q(".fill").forEach((el) => {
+        tl.fromTo(el, { scaleX: 0 }, { scaleX: num(el, "w"), duration: 0.5, ease: "power2.out" }, num(el, "t"));
+      });
+      q(".vb").forEach((el) => {
+        tl.fromTo(el, { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: "power2.out" }, num(el, "t"));
+      });
+      q("[data-hide]").forEach((el) => tl.to(el, { opacity: 0, duration: 0.01 }, num(el, "hide")));
+
+      // audience definition marker settles in the green zone
+      tl.fromTo("#marker", { x: 10 }, { x: 250, duration: 2.0, ease: "power2.inOut" }, 29.1);
+      // follow button flips to following
+      tl.fromTo("#followB", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 40.9);
+      tl.to("#followA", { opacity: 0, duration: 0.2 }, 40.9);
+
+      // caret blink, deterministic
+      q(".blink").forEach((el) => {
+        for (let t = 0; t < END; t += 0.5) {
+          tl.set(el, { opacity: 1 }, t);
+          tl.set(el, { opacity: 0 }, t + 0.25);
+        }
+      });
+
+      // scene exits: blur out like the source cut
+      q("[data-exit]").forEach((el) => {
+        tl.fromTo(el, { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(18px)", duration: 0.25, ease: "power1.in" }, num(el, "exit"));
+      });
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
