@@ -4,16 +4,21 @@ import {
   Img,
   Interactive,
   interpolate,
+  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { Arrow } from "../elements/Arrow";
-import { Particles } from "../elements/Particles";
-import { bodyFont, displayFont } from "../fonts";
+import { Grain } from "../elements/Grain";
+import { KineticLine, TypeOn } from "../elements/KineticText";
+import { Marquee } from "../elements/Marquee";
+import { Sparkle } from "../elements/Sparkle";
+import { SpinBadge } from "../elements/SpinBadge";
+import { displayFont, monoFont, serifFont } from "../fonts";
 
 type ProductSceneProps = {
-  readonly plate: string;
+  readonly bottle: string;
   readonly line1: string;
   readonly line2: string;
   readonly tagline: string;
@@ -24,20 +29,26 @@ type ProductSceneProps = {
 };
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
+
+// Rough width of an uppercase Syne ExtraBold word, in ems
+const emWidth = (word: string) =>
+  word
+    .split("")
+    .reduce(
+      (sum, ch) =>
+        sum + (ch === "W" ? 1.5 : ch === "M" ? 1.3 : ch === "I" ? 0.5 : 1.1),
+      0,
+    );
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-// Where the bottle sits in every plate (see scripts/prep_images.py)
-const BOTTLE = {
-  left: 1155,
-  top: 405,
-  width: 380,
-  height: 495,
-  cx: 1345,
-  cy: 560,
-};
+// Bottle cut-outs are 493x892; shown 700px tall, standing in the arch
+const BOTTLE_H = 700;
+const BOTTLE_W = (493 / 892) * BOTTLE_H;
+const CX = 1390;
+const BOTTLE_BOTTOM = 975;
 
 const ProductSceneInner: React.FC<ProductSceneProps> = ({
-  plate,
+  bottle,
   line1,
   line2,
   tagline,
@@ -47,185 +58,217 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
   cta,
 }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  const out = durationInFrames - 8;
-  // The music is 120 BPM, so a beat lands every 15 frames from the first cut
-  const beat = Math.exp(-(frame % 15) / 5);
+  const { fps } = useVideoConfig();
+  // The music is 120 BPM: a beat lands every 15 frames from the scene start
+  const beat = Math.exp(-(frame % 15) / 4);
+  const drop = spring({
+    frame: frame - 4,
+    fps,
+    config: { damping: 11, stiffness: 140, mass: 0.9 },
+  });
+  const float = Math.sin(frame / 11) * 9;
+  // Instead of sinking past its spot when the spring overshoots, the bottle squashes on landing
+  const squash = Math.max(0, drop - 1) * 0.6;
+  // Syne is wide: size the name so the longer line fits left of the arch (~820px)
+  const nameSize = Math.min(
+    150,
+    820 / Math.max(emWidth(line1), emWidth(line2)),
+  );
 
   return (
     <>
-      {/* Product photo with a punch-in on the cut, then a slow push */}
+      {/* Giant outlined names scrolling behind everything */}
+      <Marquee
+        name="Marquee top"
+        text={`${line1} ${line2} — `}
+        fontFamily={displayFont}
+        fontSize={250}
+        color={`${accent}55`}
+        outline
+        speed={9}
+        style={{ top: -40 }}
+      />
+      <Marquee
+        name="Marquee bottom"
+        text={`${line1} ${line2} — `}
+        fontFamily={displayFont}
+        fontSize={250}
+        color={`${accent}55`}
+        outline
+        speed={-9}
+        style={{ top: 860 }}
+      />
+
+      {/* Solid arch the bottle stands in */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          transformOrigin: `${BOTTLE.cx}px ${BOTTLE.cy}px`,
-          scale: interpolate(frame, [0, 14, durationInFrames], [1.3, 1, 1.07], {
-            ...clamp,
-            easing: ease,
-          }),
-          filter: `blur(${interpolate(frame, [0, 10], [14, 0], clamp)}px) brightness(${interpolate(
-            frame,
-            [0, 4, 14],
-            [2.2, 1.35, 1],
-            clamp,
-          )})`,
+          left: CX - 290,
+          top: 190,
+          width: 580,
+          height: 1000,
+          borderRadius: "290px 290px 0 0",
+          background: accent,
+          translate: `0 ${interpolate(frame, [0, 16], [920, 0], { ...clamp, easing: ease })}px`,
         }}
-      >
-        <Img
-          src={staticFile(plate)}
-          style={{ position: "absolute", width: 1920, height: 1080 }}
-        />
-
-        {/* Glass shine that sweeps across the bottle */}
-        <div
-          style={{
-            position: "absolute",
-            left: BOTTLE.left,
-            top: BOTTLE.top,
-            width: BOTTLE.width,
-            height: BOTTLE.height,
-            borderRadius: 44,
-            overflow: "hidden",
-            mixBlendMode: "screen",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: -100,
-              width: 140,
-              height: BOTTLE.height + 200,
-              rotate: "18deg",
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)",
-              left: interpolate(frame, [16, 42], [-220, BOTTLE.width + 120], {
-                ...clamp,
-                easing: Easing.inOut(Easing.quad),
-              }),
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Coloured glow that pulses on every beat */}
+      />
+      {/* Outline arch drawn slightly bigger, lagging behind */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          mixBlendMode: "screen",
-          background: `radial-gradient(ellipse 520px 460px at ${BOTTLE.cx}px ${BOTTLE.cy + 60}px, ${accent} 0%, transparent 70%)`,
-          opacity: 0.18 + 0.22 * beat,
+          left: CX - 320,
+          top: 160,
+          width: 640,
+          height: 1000,
+          borderRadius: "320px 320px 0 0",
+          border: "2px solid rgba(255,255,255,0.55)",
+          translate: `0 ${interpolate(frame, [4, 22], [920, 0], { ...clamp, easing: ease })}px`,
+          rotate: `${interpolate(frame, [4, 22], [-6, 0], { ...clamp, easing: ease })}deg`,
         }}
       />
 
-      {/* Darken the left side so the type reads clearly */}
+      {/* Flat contact shadow that shrinks as the bottle floats up */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0) 56%)",
+          left: CX - 210,
+          top: BOTTLE_BOTTOM - 22,
+          width: 420,
+          height: 44,
+          borderRadius: "50%",
+          background: "rgba(0,0,0,0.35)",
+          filter: "blur(6px)",
+          scale: `${(0.85 - float / 90) * drop}`,
         }}
       />
 
-      <Particles name="Bokeh" color={accent} count={34} seed={line1} />
+      {/* The bottle drops in on a spring, then floats and sways */}
+      <Img
+        src={staticFile(bottle)}
+        style={{
+          position: "absolute",
+          left: CX - BOTTLE_W / 2,
+          top: BOTTLE_BOTTOM - BOTTLE_H,
+          width: BOTTLE_W,
+          height: BOTTLE_H,
+          transformOrigin: "50% 100%",
+          translate: `0 ${Math.min(0, interpolate(drop, [0, 1], [-1200, 0])) - 10 - float}px`,
+          rotate: `${interpolate(drop, [0, 1], [-18, 0]) + Math.sin(frame / 17) * 1.6}deg`,
+          scale: `${1 + beat * 0.015 + squash * 0.5} ${1 + beat * 0.015 - squash}`,
+        }}
+      />
+
+      <SpinBadge
+        name="Badge"
+        text="EAU DE PARFUM • 50 ML • SCENTATURE • "
+        size={210}
+        color="#111111"
+        fill="#ffffff"
+        delay={16}
+        style={{ left: CX + 170, top: 230 }}
+      />
+
+      <Sparkle
+        name="Sparkle 1"
+        size={64}
+        color="#ffffff"
+        delay={14}
+        style={{ left: CX - 330, top: 300 }}
+      />
+      <Sparkle
+        name="Sparkle 2"
+        size={34}
+        color="#ffffff"
+        delay={20}
+        style={{ left: CX + 290, top: 560 }}
+      />
+      <Sparkle
+        name="Sparkle 3"
+        size={46}
+        color="#ffffff"
+        delay={26}
+        style={{ left: CX - 300, top: 760 }}
+      />
+      <Sparkle
+        name="Sparkle 4"
+        size={26}
+        color={accent}
+        delay={30}
+        style={{ left: CX - 420, top: 520 }}
+      />
 
       {/* Copy block */}
-      <div
-        style={{
-          position: "absolute",
-          left: 130,
-          top: 200,
-          width: 860,
-          translate: `${interpolate(frame, [out, durationInFrames], [0, -120], {
-            ...clamp,
-            easing: Easing.in(Easing.cubic),
-          })}px 0`,
-          opacity: interpolate(frame, [out, durationInFrames], [1, 0], clamp),
-        }}
-      >
-        <div
+      <div style={{ position: "absolute", left: 130, top: 236, width: 900 }}>
+        <TypeOn
+          text={`[${String(index).padStart(2, "0")}/${String(total).padStart(2, "0")}]  SCENTATURE PARFUMS`}
+          start={4}
+          charsPerFrame={2.2}
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 20,
-            fontFamily: bodyFont,
-            fontWeight: 600,
-            fontSize: 26,
-            letterSpacing: 8,
+            fontFamily: monoFont,
+            fontWeight: 700,
+            fontSize: 24,
+            letterSpacing: 3,
             color: accent,
-            opacity: interpolate(frame, [6, 18], [0, 1], clamp),
-            translate: `${interpolate(frame, [6, 20], [-40, 0], { ...clamp, easing: ease })}px 0`,
           }}
-        >
-          <span>{String(index).padStart(2, "0")}</span>
-          <span
+        />
+
+        <div style={{ marginTop: 18 }}>
+          <KineticLine
+            text={line1}
+            start={6}
+            stagger={1.5}
             style={{
-              height: 2,
-              background: accent,
-              width: interpolate(frame, [8, 26], [0, 90], {
-                ...clamp,
-                easing: ease,
-              }),
+              fontFamily: displayFont,
+              fontWeight: 800,
+              fontSize: nameSize,
+              lineHeight: 0.95,
+              letterSpacing: -3,
+              color: "#ffffff",
             }}
           />
-          <span style={{ color: "rgba(255,255,255,0.7)" }}>
-            {String(total).padStart(2, "0")}
-          </span>
+          <KineticLine
+            text={line2}
+            start={11}
+            stagger={1.5}
+            style={{
+              fontFamily: displayFont,
+              fontWeight: 800,
+              fontSize: nameSize,
+              lineHeight: 0.95,
+              letterSpacing: -3,
+              color: accent,
+            }}
+          />
         </div>
-
-        {[line1, line2].map((line, i) => (
-          <div key={line} style={{ overflow: "hidden", paddingTop: 6 }}>
-            <div
-              style={{
-                fontFamily: displayFont,
-                fontSize: 200,
-                lineHeight: 0.98,
-                textTransform: "uppercase",
-                color: i === 0 ? "#ffffff" : accent,
-                textShadow:
-                  i === 1
-                    ? `0 0 40px ${accent}88`
-                    : "0 6px 30px rgba(0,0,0,0.5)",
-                translate: `0 ${interpolate(
-                  frame,
-                  [8 + i * 5, 24 + i * 5],
-                  [110, 0],
-                  {
-                    ...clamp,
-                    easing: ease,
-                  },
-                )}%`,
-                letterSpacing: interpolate(
-                  frame,
-                  [8 + i * 5, 34 + i * 5],
-                  [24, 3],
-                  {
-                    ...clamp,
-                    easing: ease,
-                  },
-                ),
-              }}
-            >
-              {line}
-            </div>
-          </div>
-        ))}
 
         <div
           style={{
-            marginTop: 26,
-            fontFamily: bodyFont,
-            fontWeight: 600,
-            fontSize: 30,
-            letterSpacing: 9,
-            color: "rgba(255,255,255,0.88)",
-            opacity: interpolate(frame, [20, 32], [0, 1], clamp),
-            translate: `0 ${interpolate(frame, [20, 34], [24, 0], { ...clamp, easing: ease })}px`,
+            marginTop: 22,
+            fontFamily: serifFont,
+            fontStyle: "italic",
+            fontSize: 64,
+            lineHeight: 1.05,
+            color: "rgba(255,255,255,0.92)",
           }}
         >
-          {tagline}
+          {tagline.split(" ").map((word, i) => (
+            <span
+              key={`${word}-${i}`}
+              style={{
+                display: "inline-block",
+                marginRight: 16,
+                opacity: interpolate(
+                  frame,
+                  [20 + i * 2, 28 + i * 2],
+                  [0, 1],
+                  clamp,
+                ),
+                translate: `0 ${interpolate(frame, [20 + i * 2, 30 + i * 2], [30, 0], { ...clamp, easing: ease })}px`,
+              }}
+            >
+              {word}
+            </span>
+          ))}
         </div>
 
         <div
@@ -233,50 +276,45 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
             marginTop: 40,
             display: "flex",
             alignItems: "center",
-            gap: 24,
-            opacity: interpolate(frame, [26, 36], [0, 1], clamp),
-            translate: `0 ${interpolate(frame, [26, 40], [24, 0], { ...clamp, easing: ease })}px`,
+            gap: 28,
           }}
         >
           <div
             style={{
-              fontFamily: bodyFont,
-              fontWeight: 700,
-              fontSize: 26,
-              letterSpacing: 4,
-              color: "#111",
-              background: accent,
-              padding: "18px 36px",
               display: "flex",
               alignItems: "center",
               gap: 14,
+              fontFamily: displayFont,
+              fontWeight: 800,
+              fontSize: 28,
+              letterSpacing: 2,
+              color: "#111111",
+              background: accent,
+              padding: "20px 36px",
               borderRadius: 999,
-              boxShadow: `0 0 ${20 + 24 * beat}px ${accent}`,
-              scale: interpolate(frame, [30, 40], [0.8, 1], {
-                ...clamp,
-                easing: Easing.out(Easing.back(2.2)),
-              }),
+              clipPath: `inset(0 ${interpolate(frame, [30, 42], [100, 0], { ...clamp, easing: ease })}% 0 0 round 999px)`,
             }}
           >
             {cta}
-            <Arrow size={26} />
+            <span style={{ display: "flex", translate: `${beat * 8}px 0` }}>
+              <Arrow size={28} />
+            </span>
           </div>
           <div
             style={{
-              fontFamily: bodyFont,
-              fontWeight: 600,
-              fontSize: 24,
-              letterSpacing: 6,
+              fontFamily: monoFont,
+              fontSize: 22,
+              letterSpacing: 2,
               color: "rgba(255,255,255,0.75)",
-              border: "1.5px solid rgba(255,255,255,0.35)",
-              padding: "16px 28px",
-              borderRadius: 999,
+              opacity: interpolate(frame, [36, 44], [0, 1], clamp),
             }}
           >
-            EAU DE PARFUM · 50ML
+            EAU DE PARFUM — 50 ML
           </div>
         </div>
       </div>
+
+      <Grain opacity={0.22} />
     </>
   );
 };
@@ -293,7 +331,7 @@ export const ProductScene = Interactive.create({
       description: "Name, second line",
     },
     tagline: { type: "string", default: "", description: "Tagline" },
-    accent: { type: "color", default: "#E08A3C", description: "Accent colour" },
+    accent: { type: "color", default: "#E07A2E", description: "Accent colour" },
     cta: { type: "string", default: "SHOP NOW", description: "Button text" },
   },
 });

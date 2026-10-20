@@ -7,86 +7,126 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import { Particles } from "../elements/Particles";
-import { bodyFont } from "../fonts";
+import { Grain } from "../elements/Grain";
+import { TypeOn } from "../elements/KineticText";
+import { Sparkle } from "../elements/Sparkle";
+import { SpinBadge } from "../elements/SpinBadge";
+import { monoFont } from "../fonts";
 
 type IntroSceneProps = {
   readonly tagline: string;
 };
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
+const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+const COLORS = ["#E07A2E", "#FF2E7E", "#22C55E", "#3B6BFF"];
 
 const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
   const frame = useCurrentFrame();
 
   return (
     <>
-      {/* Slowly turning glow in all four collection colours */}
-      <div
-        style={{
-          position: "absolute",
-          inset: -400,
-          background:
-            "conic-gradient(from 0deg at 50% 50%, #E08A3C33, #FF2E7E33, #2BD96033, #4D7CFF33, #E08A3C33)",
-          filter: "blur(120px)",
-          rotate: interpolate(frame, [0, 60], ["0deg", "90deg"]),
-          opacity: interpolate(frame, [0, 20], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-        }}
-      />
-      <Particles name="Gold dust" color="#F3D9A4" count={40} seed="intro" />
+      {/* Four colour bars sweep up through the frame, one per scent */}
+      {COLORS.map((color, i) => (
+        <div
+          key={color}
+          style={{
+            position: "absolute",
+            left: i * 480,
+            top: 0,
+            width: 480,
+            height: 1080,
+            background: color,
+            translate: `0 ${interpolate(
+              frame,
+              [i * 2, i * 2 + 10, i * 2 + 12, i * 2 + 22],
+              [1080, 0, 0, -1080],
+              {
+                ...clamp,
+                easing: Easing.inOut(Easing.cubic),
+              },
+            )}px`,
+          }}
+        />
+      ))}
 
-      {/* Light line that draws across before the logo */}
+      {/* Thin frame lines that draw in from the corners */}
       <div
         style={{
           position: "absolute",
-          left: "50%",
-          top: 540,
+          left: 60,
+          top: 60,
           height: 2,
-          translate: "-50% 0",
-          background: "linear-gradient(90deg, transparent, #fff, transparent)",
-          boxShadow: "0 0 24px 4px rgba(255,255,255,0.6)",
-          width: interpolate(frame, [0, 14], [0, 1400], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
+          background: "rgba(255,255,255,0.5)",
+          width: interpolate(frame, [18, 36], [0, 1800], {
+            ...clamp,
             easing: ease,
-          }),
-          opacity: interpolate(frame, [0, 4, 16, 26], [0, 1, 1, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
           }),
         }}
       />
-
-      {/* Glow sits outside the wipe mask so it isn't cut into a box */}
       <div
         style={{
           position: "absolute",
-          left: 550,
-          top: 315,
-          width: 820,
-          filter: "drop-shadow(0 0 28px rgba(255,255,255,0.45))",
-          scale: interpolate(frame, [8, 40, 48, 60], [1.08, 1, 1, 1.18], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
+          right: 60,
+          bottom: 60,
+          height: 2,
+          background: "rgba(255,255,255,0.5)",
+          width: interpolate(frame, [18, 36], [0, 1800], {
+            ...clamp,
             easing: ease,
           }),
-          opacity: interpolate(frame, [50, 59], [1, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
+        }}
+      />
+      <TypeOn
+        text="SCENTATURE / PERFUME & ATTAR STUDIO"
+        start={22}
+        charsPerFrame={2.5}
+        style={{
+          position: "absolute",
+          left: 60,
+          top: 80,
+          fontFamily: monoFont,
+          fontSize: 20,
+          letterSpacing: 3,
+          color: "#fff",
+        }}
+      />
+      <TypeOn
+        text="04 SIGNATURE SCENTS"
+        start={26}
+        charsPerFrame={2}
+        style={{
+          position: "absolute",
+          right: 60,
+          bottom: 80,
+          fontFamily: monoFont,
+          fontSize: 20,
+          letterSpacing: 3,
+          color: "#fff",
+        }}
+      />
+
+      {/* Logo writes itself on, then punches forward into the first cut */}
+      <div
+        style={{
+          position: "absolute",
+          left: 530,
+          top: 330,
+          width: 860,
+          scale: interpolate(frame, [18, 44, 50, 60], [1.12, 1, 1, 1.35], {
+            ...clamp,
+            easing: ease,
           }),
+          opacity: interpolate(frame, [52, 58], [1, 0], clamp),
         }}
       >
         <Img
           src={staticFile("logo-white.png")}
           style={{
             display: "block",
-            width: 820,
-            clipPath: `inset(0 ${interpolate(frame, [8, 30], [100, 0], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
+            width: 860,
+            clipPath: `inset(0 ${interpolate(frame, [18, 38], [100, 0], {
+              ...clamp,
               easing: Easing.inOut(Easing.cubic),
             })}% 0 0)`,
           }}
@@ -96,26 +136,55 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
       <div
         style={{
           position: "absolute",
-          top: 660,
+          top: 690,
           width: "100%",
           textAlign: "center",
-          fontFamily: bodyFont,
-          fontWeight: 600,
-          fontSize: 30,
-          letterSpacing: interpolate(frame, [24, 44], [30, 14], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
+          fontFamily: monoFont,
+          fontWeight: 700,
+          fontSize: 26,
+          letterSpacing: interpolate(frame, [30, 46], [26, 10], {
+            ...clamp,
             easing: ease,
           }),
-          color: "#F3D9A4",
-          opacity: interpolate(frame, [24, 36, 48, 56], [0, 1, 1, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
+          color: "#ffffff",
+          opacity: interpolate(frame, [30, 38, 50, 56], [0, 1, 1, 0], clamp),
         }}
       >
         {tagline}
       </div>
+
+      <SpinBadge
+        name="Badge"
+        text="SIGNATURE COLLECTION • SCENTATURE • "
+        size={190}
+        color="#111111"
+        fill="#ffffff"
+        delay={28}
+        style={{ left: 1420, top: 210 }}
+      />
+      <Sparkle
+        name="Sparkle 1"
+        size={58}
+        color="#ffffff"
+        delay={30}
+        style={{ left: 470, top: 300 }}
+      />
+      <Sparkle
+        name="Sparkle 2"
+        size={30}
+        color="#FF2E7E"
+        delay={34}
+        style={{ left: 1360, top: 620 }}
+      />
+      <Sparkle
+        name="Sparkle 3"
+        size={40}
+        color="#E07A2E"
+        delay={38}
+        style={{ left: 600, top: 650 }}
+      />
+
+      <Grain opacity={0.22} />
     </>
   );
 };

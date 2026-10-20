@@ -273,6 +273,16 @@ def make_riser() -> np.ndarray:
     return s / np.max(np.abs(s)) * 0.7
 
 
+def make_pop() -> np.ndarray:
+    """Short, bubbly pop for the bottle landing and badges popping in."""
+    t = t_axis(0.35)
+    freq = 1400 * np.exp(-t * 30) + 380
+    body = np.sin(2 * np.pi * np.cumsum(freq) / SR) * np.exp(-t * 22)
+    thump = np.sin(2 * np.pi * np.cumsum(120 * np.exp(-t * 18) + 50) / SR) * np.exp(-t * 16) * 0.8
+    s = reverb(body * 0.6 + thump, 0.6, 0.18, 8)
+    return s / np.max(np.abs(s)) * 0.8
+
+
 def save(name: str, data: np.ndarray) -> None:
     import wave
 
@@ -293,4 +303,5 @@ if __name__ == "__main__":
     save("impact.wav", make_impact())
     save("shimmer.wav", make_shimmer())
     save("riser.wav", make_riser())
+    save("pop.wav", make_pop())
     print("done")

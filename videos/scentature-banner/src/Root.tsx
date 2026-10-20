@@ -1,6 +1,8 @@
 import { Composition, Folder } from "remotion";
-import { Flash } from "./elements/Flash";
-import { Particles } from "./elements/Particles";
+import { Marquee } from "./elements/Marquee";
+import { PanelWipe } from "./elements/PanelWipe";
+import { Sparkle } from "./elements/Sparkle";
+import { SpinBadge } from "./elements/SpinBadge";
 import { ScentatureBanner } from "./ScentatureBanner";
 import { IntroScene } from "./scenes/IntroScene";
 import { OutroScene } from "./scenes/OutroScene";
@@ -27,7 +29,7 @@ export const RemotionRoot: React.FC = () => {
           height={1080}
           defaultProps={{
             tagline: "THE SIGNATURE COLLECTION",
-            style: { backgroundColor: "#050505" },
+            style: { backgroundColor: "#0A0A0A" },
           }}
         />
         <Composition
@@ -38,15 +40,15 @@ export const RemotionRoot: React.FC = () => {
           width={1920}
           height={1080}
           defaultProps={{
-            plate: "plates/bad-girl.jpg",
+            bottle: "bottles/bad-girl.png",
             line1: "BAD",
             line2: "GIRL",
-            tagline: "BOLD · WARM · UNFORGETTABLE",
-            accent: "#E08A3C",
+            tagline: "Bold, warm & unforgettable.",
+            accent: "#E07A2E",
             index: 1,
             total: 4,
             cta: "SHOP NOW",
-            style: { backgroundColor: "#000" },
+            style: { backgroundColor: "#170D07" },
           }}
         />
         <Composition
@@ -58,28 +60,66 @@ export const RemotionRoot: React.FC = () => {
           height={1080}
           defaultProps={{
             cta: "SHOP THE COLLECTION",
-            style: { backgroundColor: "#050505" },
+            style: { backgroundColor: "#0A0A0A" },
           }}
         />
       </Folder>
       <Folder name="Elements">
         <Composition
-          id="Particles"
-          component={Particles}
+          id="Marquee"
+          component={Marquee}
           durationInFrames={90}
           fps={30}
           width={1920}
           height={1080}
-          defaultProps={{ color: "#F3D9A4", count: 40, seed: "preview" }}
+          defaultProps={{
+            text: "SCENTATURE — ",
+            fontFamily: "Syne",
+            fontSize: 250,
+            color: "#ffffff",
+            outline: true,
+            speed: 9,
+            style: { top: 400 },
+          }}
         />
         <Composition
-          id="Flash"
-          component={Flash}
-          durationInFrames={12}
+          id="SpinBadge"
+          component={SpinBadge}
+          durationInFrames={90}
           fps={30}
           width={1920}
           height={1080}
-          defaultProps={{ color: "#FF2E7E" }}
+          defaultProps={{
+            text: "EAU DE PARFUM • 50 ML • SCENTATURE • ",
+            size: 300,
+            color: "#111111",
+            fill: "#ffffff",
+            delay: 0,
+            style: { left: 810, top: 390 },
+          }}
+        />
+        <Composition
+          id="Sparkle"
+          component={Sparkle}
+          durationInFrames={60}
+          fps={30}
+          width={1920}
+          height={1080}
+          defaultProps={{
+            size: 200,
+            color: "#ffffff",
+            delay: 0,
+            style: { left: 860, top: 440 },
+          }}
+        />
+        <Composition
+          id="PanelWipe"
+          component={PanelWipe}
+          durationInFrames={18}
+          fps={30}
+          width={1920}
+          height={1080}
+          defaultProps={{ first: "#ffffff", second: "#FF2E7E" }}
         />
       </Folder>
     </>

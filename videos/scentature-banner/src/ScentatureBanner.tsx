@@ -1,6 +1,6 @@
 import { Audio } from "@remotion/media";
 import { AbsoluteFill, staticFile, Track, useVideoConfig } from "remotion";
-import { Flash } from "./elements/Flash";
+import { PanelWipe } from "./elements/PanelWipe";
 import { IntroScene } from "./scenes/IntroScene";
 import { OutroScene } from "./scenes/OutroScene";
 import { ProductScene } from "./scenes/ProductScene";
@@ -11,109 +11,115 @@ export const ScentatureBanner = () => {
   const { fps } = useVideoConfig();
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+    <AbsoluteFill style={{ backgroundColor: "#0A0A0A" }}>
       <Track name="Scenes">
         <IntroScene
           name="Intro – logo"
           durationInFrames={2 * fps}
           tagline="THE SIGNATURE COLLECTION"
-          style={{ backgroundColor: "#050505" }}
+          style={{ backgroundColor: "#0A0A0A" }}
         />
         <ProductScene
           name="Bad Girl"
           from={2 * fps}
           durationInFrames={2.5 * fps}
-          plate="plates/bad-girl.jpg"
+          bottle="bottles/bad-girl.png"
           line1="BAD"
           line2="GIRL"
-          tagline="BOLD · WARM · UNFORGETTABLE"
-          accent="#E08A3C"
+          tagline="Bold, warm & unforgettable."
+          accent="#E07A2E"
           index={1}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#000" }}
+          style={{ backgroundColor: "#170D07" }}
         />
         <ProductScene
           name="Floral Kiss"
           from={4.5 * fps}
           durationInFrames={2.5 * fps}
-          plate="plates/floral-kiss.jpg"
+          bottle="bottles/floral-kiss.png"
           line1="FLORAL"
           line2="KISS"
-          tagline="SOFT · ROMANTIC · IN BLOOM"
+          tagline="Soft, romantic & in bloom."
           accent="#FF2E7E"
           index={2}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#000" }}
+          style={{ backgroundColor: "#16060D" }}
         />
         <ProductScene
           name="Hawas Classic"
           from={7 * fps}
           durationInFrames={2.5 * fps}
-          plate="plates/hawas-classic.jpg"
+          bottle="bottles/hawas-classic.png"
           line1="HAWAS"
           line2="CLASSIC"
-          tagline="FRESH · CONFIDENT · TIMELESS"
-          accent="#2BD960"
+          tagline="Fresh, confident & timeless."
+          accent="#22C55E"
           index={3}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#000" }}
+          style={{ backgroundColor: "#04130A" }}
         />
         <ProductScene
           name="Hawas Ice"
           from={9.5 * fps}
           durationInFrames={2.5 * fps}
-          plate="plates/hawas-ice.jpg"
+          bottle="bottles/hawas-ice.png"
           line1="HAWAS"
           line2="ICE"
-          tagline="COOL · CRISP · ELECTRIC"
-          accent="#4D7CFF"
+          tagline="Cool, crisp & electric."
+          accent="#3B6BFF"
           index={4}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#000" }}
+          style={{ backgroundColor: "#050A1B" }}
         />
         <OutroScene
           name="Outro – line-up"
           from={12 * fps}
           durationInFrames={3 * fps}
           cta="SHOP THE COLLECTION"
-          style={{ backgroundColor: "#050505" }}
+          style={{ backgroundColor: "#0A0A0A" }}
         />
       </Track>
 
-      <Track name="Cut flashes">
-        <Flash
-          name="Flash → Bad Girl"
-          from={2 * fps - 2}
-          durationInFrames={12}
-          color="#E08A3C"
+      {/* Each wipe covers its cut at its own frame 8 */}
+      <Track name="Wipes">
+        <PanelWipe
+          name="Wipe → Bad Girl"
+          from={2 * fps - 8}
+          durationInFrames={18}
+          first="#ffffff"
+          second="#E07A2E"
         />
-        <Flash
-          name="Flash → Floral Kiss"
-          from={4.5 * fps - 2}
-          durationInFrames={12}
-          color="#FF2E7E"
+        <PanelWipe
+          name="Wipe → Floral Kiss"
+          from={4.5 * fps - 8}
+          durationInFrames={18}
+          first="#E07A2E"
+          second="#FF2E7E"
         />
-        <Flash
-          name="Flash → Hawas Classic"
-          from={7 * fps - 2}
-          durationInFrames={12}
-          color="#2BD960"
+        <PanelWipe
+          name="Wipe → Hawas Classic"
+          from={7 * fps - 8}
+          durationInFrames={18}
+          first="#FF2E7E"
+          second="#22C55E"
         />
-        <Flash
-          name="Flash → Hawas Ice"
-          from={9.5 * fps - 2}
-          durationInFrames={12}
-          color="#4D7CFF"
+        <PanelWipe
+          name="Wipe → Hawas Ice"
+          from={9.5 * fps - 8}
+          durationInFrames={18}
+          first="#22C55E"
+          second="#3B6BFF"
         />
-        <Flash
-          name="Flash → Outro"
-          from={12 * fps - 2}
-          durationInFrames={12}
-          color="#F3D9A4"
+        <PanelWipe
+          name="Wipe → Outro"
+          from={12 * fps - 8}
+          durationInFrames={18}
+          first="#3B6BFF"
+          second="#ffffff"
         />
       </Track>
 
@@ -123,15 +129,27 @@ export const ScentatureBanner = () => {
         <Audio name="Riser" src={staticFile("audio/riser.wav")} volume={0.45} />
         <Audio
           name="Shimmer – logo"
-          from={8}
+          from={18}
           src={staticFile("audio/shimmer.wav")}
           volume={0.5}
+        />
+        <Audio
+          name="Whoosh – Bad Girl"
+          from={2 * fps - 12}
+          src={staticFile("audio/whoosh.wav")}
+          volume={0.4}
         />
         <Audio
           name="Impact – Bad Girl"
           from={2 * fps}
           src={staticFile("audio/impact.wav")}
           volume={0.3}
+        />
+        <Audio
+          name="Pop – Bad Girl"
+          from={2 * fps + 13}
+          src={staticFile("audio/pop.wav")}
+          volume={0.35}
         />
         <Audio
           name="Whoosh – Floral Kiss"
@@ -146,6 +164,12 @@ export const ScentatureBanner = () => {
           volume={0.3}
         />
         <Audio
+          name="Pop – Floral Kiss"
+          from={4.5 * fps + 13}
+          src={staticFile("audio/pop.wav")}
+          volume={0.35}
+        />
+        <Audio
           name="Whoosh – Hawas Classic"
           from={7 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
@@ -158,6 +182,12 @@ export const ScentatureBanner = () => {
           volume={0.3}
         />
         <Audio
+          name="Pop – Hawas Classic"
+          from={7 * fps + 13}
+          src={staticFile("audio/pop.wav")}
+          volume={0.35}
+        />
+        <Audio
           name="Whoosh – Hawas Ice"
           from={9.5 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
@@ -168,6 +198,12 @@ export const ScentatureBanner = () => {
           from={9.5 * fps}
           src={staticFile("audio/impact.wav")}
           volume={0.3}
+        />
+        <Audio
+          name="Pop – Hawas Ice"
+          from={9.5 * fps + 13}
+          src={staticFile("audio/pop.wav")}
+          volume={0.35}
         />
         <Audio
           name="Whoosh – Outro"
@@ -183,7 +219,7 @@ export const ScentatureBanner = () => {
         />
         <Audio
           name="Shimmer – Outro"
-          from={12 * fps + 36}
+          from={12 * fps + 30}
           src={staticFile("audio/shimmer.wav")}
           volume={0.45}
         />
