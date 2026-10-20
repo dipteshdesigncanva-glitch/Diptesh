@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This repo is a collection of Claude Code skills for making videos with code. There is no app here yet. The skills live in `.claude/skills/` and are tracked in `skills-lock.json`.
+This repo is a collection of Claude Code skills for making videos, animation and 3D for the web with code. There is no app here yet. The skills live in `.claude/skills/` and are tracked in `skills-lock.json`.
 
 ## Installed skills
 
@@ -19,6 +19,21 @@ This repo is a collection of Claude Code skills for making videos with code. The
 | `remotion-saas` | `remotion-dev/skills` | Build an app on top of Remotion |
 | `remotion-docs` | `remotion-dev/skills` | Look up current Remotion docs |
 | `remotion-upgrade` | `remotion-dev/skills` | Upgrade Remotion packages |
+
+### Animation (GSAP, official)
+
+From `greensock/gsap-skills`: `gsap-core`, `gsap-timeline`, `gsap-scrolltrigger`, `gsap-plugins`, `gsap-react`, `gsap-frameworks`, `gsap-utils`, `gsap-performance`.
+
+### Web design, animation and 3D
+
+From `freshtechbro/claudedesignskills`:
+
+- **3D:** `threejs-webgl`, `react-three-fiber`, `babylonjs-engine`, `playcanvas-engine`, `aframe-webxr`, `lightweight-3d-effects`, `spline-interactive`, `blender-web-pipeline`, `substance-3d-texturing`, `web3d-integration-patterns`
+- **2D and UI animation:** `animejs`, `motion-framer`, `react-spring-physics`, `lottie-animations`, `rive-interactive`, `pixijs-2d`, `animated-component-libraries`
+- **Scroll and page transitions:** `locomotive-scroll`, `scroll-reveal-libraries`, `barba-js`
+- **Design:** `modern-web-design`
+
+Two skills from that pack are deliberately not installed: its `gsap-scrolltrigger` (the official GreenSock one is used instead) and its `skill-creator` (Anthropic's built-in one already covers this).
 
 ## Choosing a tool
 
