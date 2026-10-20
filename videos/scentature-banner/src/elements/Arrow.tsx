@@ -1,4 +1,4 @@
-// Drawn as SVG because Montserrat's latin subset has no "→" glyph
+// Drawn as SVG so the arrow looks the same whatever font the button uses
 export const Arrow: React.FC<{ readonly size: number }> = ({ size }) => (
   <svg
     width={size}
