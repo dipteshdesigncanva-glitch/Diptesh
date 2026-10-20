@@ -3,9 +3,10 @@
 A 15-second, 1920×1080 looping motion-graphics banner for the Scentature website, built with Remotion.
 
 - **Timeline:** logo intro (0–2 s), Bad Girl, Floral Kiss, Hawas Classic and Hawas Ice (2.5 s each) with the bottle dropping in on a spring, then the collection line-up (12–15 s).
-- **Audio:** the 120 BPM music and all sound effects are synthesized by `scripts/make_audio.py`, so there are no licensing issues. Every scene cut lands on a beat.
+- **Audio:** smooth R&B-style music (electric piano, sub bass, half-time drums, bells) plus whoosh, glass-clink, perfume-spray, shimmer and swell sound effects, all synthesized by `scripts/make_audio.py`, so there are no licensing issues. Every scene cut lands on a beat.
 - **Images:** `scripts/prep_images.py` cuts each bottle out of its product photo (`public/bottles/`) and makes the white logo.
-- **Look:** flat colour arches, outlined marquee type, spinning badges, sparkles, film grain and slanted colour-panel wipes. No glows. Fonts: Syne, Instrument Serif italic and Space Mono, bundled in `public/fonts/`.
+- **Look:** flat colour arches, themed floating shapes (drops, petals, leaves, ice), dashed rings, a dot grid, spray mist, a swinging ₹299 price tag, outlined marquee type, sparkles, film grain and slanted colour-panel wipes. No glows.
+- **Fonts:** Playfair Display (names, taglines) and Poppins (prices, labels, buttons; its Devanagari file supplies the ₹ sign), bundled in `public/fonts/`.
 
 ## Commands
 

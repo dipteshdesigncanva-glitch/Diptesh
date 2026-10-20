@@ -41,14 +41,16 @@ export const RemotionRoot: React.FC = () => {
           height={1080}
           defaultProps={{
             bottle: "bottles/bad-girl.png",
-            line1: "BAD",
-            line2: "GIRL",
+            line1: "Bad",
+            line2: "Girl",
+            shape: "drop",
+            base: "#120A06",
+            price: "₹299",
             tagline: "Bold, warm & unforgettable.",
             accent: "#E07A2E",
             index: 1,
             total: 4,
             cta: "SHOP NOW",
-            style: { backgroundColor: "#170D07" },
           }}
         />
         <Composition
@@ -59,6 +61,8 @@ export const RemotionRoot: React.FC = () => {
           width={1920}
           height={1080}
           defaultProps={{
+            headline: "Four signature scents, each",
+            price: "₹299",
             cta: "SHOP THE COLLECTION",
             style: { backgroundColor: "#0A0A0A" },
           }}
@@ -74,7 +78,7 @@ export const RemotionRoot: React.FC = () => {
           height={1080}
           defaultProps={{
             text: "SCENTATURE — ",
-            fontFamily: "Syne",
+            fontFamily: "Playfair Display",
             fontSize: 250,
             color: "#ffffff",
             outline: true,

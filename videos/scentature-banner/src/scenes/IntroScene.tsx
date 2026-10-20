@@ -11,7 +11,8 @@ import { Grain } from "../elements/Grain";
 import { TypeOn } from "../elements/KineticText";
 import { Sparkle } from "../elements/Sparkle";
 import { SpinBadge } from "../elements/SpinBadge";
-import { monoFont } from "../fonts";
+import { FloatingShapes } from "../elements/FloatingShapes";
+import { bodyFont } from "../fonts";
 
 type IntroSceneProps = {
   readonly tagline: string;
@@ -50,6 +51,37 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
         />
       ))}
 
+      <FloatingShapes
+        name="Shapes"
+        shape="mixed"
+        color="#E07A2E"
+        count={6}
+        seed="intro-a"
+        depth="back"
+        xMin={30}
+        xMax={430}
+      />
+      <FloatingShapes
+        name="Shapes pink"
+        shape="petal"
+        color="#FF2E7E"
+        count={5}
+        seed="intro-b"
+        depth="back"
+        xMin={1490}
+        xMax={1890}
+      />
+      <FloatingShapes
+        name="Shapes blue"
+        shape="ice"
+        color="#3B6BFF"
+        count={4}
+        seed="intro-c"
+        depth="back"
+        xMin={30}
+        xMax={430}
+      />
+
       {/* Thin frame lines that draw in from the corners */}
       <div
         style={{
@@ -85,21 +117,21 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           position: "absolute",
           left: 60,
           top: 80,
-          fontFamily: monoFont,
+          fontFamily: bodyFont,
           fontSize: 20,
           letterSpacing: 3,
           color: "#fff",
         }}
       />
       <TypeOn
-        text="04 SIGNATURE SCENTS"
+        text="4 SIGNATURE SCENTS  ·  ₹299 EACH"
         start={26}
         charsPerFrame={2}
         style={{
           position: "absolute",
           right: 60,
           bottom: 80,
-          fontFamily: monoFont,
+          fontFamily: bodyFont,
           fontSize: 20,
           letterSpacing: 3,
           color: "#fff",
@@ -139,7 +171,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           top: 690,
           width: "100%",
           textAlign: "center",
-          fontFamily: monoFont,
+          fontFamily: bodyFont,
           fontWeight: 700,
           fontSize: 26,
           letterSpacing: interpolate(frame, [30, 46], [26, 10], {
@@ -155,7 +187,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
 
       <SpinBadge
         name="Badge"
-        text="SIGNATURE COLLECTION • SCENTATURE • "
+        text="ALL AT ₹299 • SCENTATURE • "
         size={190}
         color="#111111"
         fill="#ffffff"

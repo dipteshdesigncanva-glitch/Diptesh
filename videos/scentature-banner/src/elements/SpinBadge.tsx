@@ -1,7 +1,7 @@
 import type React from "react";
 import { useId } from "react";
 import { Easing, Interactive, interpolate, useCurrentFrame } from "remotion";
-import { monoFont } from "../fonts";
+import { bodyFont } from "../fonts";
 
 type SpinBadgeProps = {
   readonly text: string;
@@ -50,9 +50,9 @@ const SpinBadgeInner: React.FC<SpinBadgeProps> = ({
         />
         <text
           fill={color}
-          fontFamily={monoFont}
-          fontSize={(2 * Math.PI * r) / (text.length * 0.62)}
-          fontWeight={700}
+          fontFamily={bodyFont}
+          fontSize={(2 * Math.PI * r) / (text.length * 0.66)}
+          fontWeight={600}
           letterSpacing={0}
         >
           <textPath href={`#${pathId}`}>{text}</textPath>

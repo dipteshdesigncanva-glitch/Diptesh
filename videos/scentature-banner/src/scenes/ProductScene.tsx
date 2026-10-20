@@ -10,12 +10,15 @@ import {
   useVideoConfig,
 } from "remotion";
 import { Arrow } from "../elements/Arrow";
+import { Backdrop } from "../elements/Backdrop";
+import { FloatingShapes, type ShapeKind } from "../elements/FloatingShapes";
 import { Grain } from "../elements/Grain";
 import { KineticLine, TypeOn } from "../elements/KineticText";
 import { Marquee } from "../elements/Marquee";
+import { Mist } from "../elements/Mist";
+import { PriceTag } from "../elements/PriceTag";
 import { Sparkle } from "../elements/Sparkle";
-import { SpinBadge } from "../elements/SpinBadge";
-import { displayFont, monoFont, serifFont } from "../fonts";
+import { bodyFont, displayFont } from "../fonts";
 
 type ProductSceneProps = {
   readonly bottle: string;
@@ -23,29 +26,33 @@ type ProductSceneProps = {
   readonly line2: string;
   readonly tagline: string;
   readonly accent: string;
+  readonly base: string;
+  readonly shape: ShapeKind;
+  readonly price: string;
   readonly index: number;
   readonly total: number;
   readonly cta: string;
 };
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
+const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-// Rough width of an uppercase Syne ExtraBold word, in ems
+// Rough width of an uppercase Playfair Display ExtraBold word, in ems
 const emWidth = (word: string) =>
   word
     .split("")
     .reduce(
       (sum, ch) =>
-        sum + (ch === "W" ? 1.5 : ch === "M" ? 1.3 : ch === "I" ? 0.5 : 1.1),
+        sum + (ch === "W" || ch === "M" ? 1.1 : ch === "I" ? 0.45 : 0.78),
       0,
     );
-const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 // Bottle cut-outs are 493x892; shown 700px tall, standing in the arch
 const BOTTLE_H = 700;
 const BOTTLE_W = (493 / 892) * BOTTLE_H;
 const CX = 1390;
 const BOTTLE_BOTTOM = 975;
+const BOTTLE_TOP = BOTTLE_BOTTOM - BOTTLE_H;
 
 const ProductSceneInner: React.FC<ProductSceneProps> = ({
   bottle,
@@ -53,6 +60,9 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
   line2,
   tagline,
   accent,
+  base,
+  shape,
+  price,
   index,
   total,
   cta,
@@ -69,34 +79,44 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
   const float = Math.sin(frame / 11) * 9;
   // Instead of sinking past its spot when the spring overshoots, the bottle squashes on landing
   const squash = Math.max(0, drop - 1) * 0.6;
-  // Syne is wide: size the name so the longer line fits left of the arch (~820px)
-  const nameSize = Math.min(
-    150,
-    820 / Math.max(emWidth(line1), emWidth(line2)),
-  );
+  const sway = Math.sin(frame / 17) * 1.6;
+  const nameSize = Math.min(160, 800 / emWidth(line2));
 
   return (
     <>
-      {/* Giant outlined names scrolling behind everything */}
-      <Marquee
-        name="Marquee top"
-        text={`${line1} ${line2} — `}
-        fontFamily={displayFont}
-        fontSize={250}
-        color={`${accent}55`}
-        outline
-        speed={9}
-        style={{ top: -40 }}
+      <Backdrop
+        name="Backdrop"
+        accent={accent}
+        base={base}
+        ringsX={CX}
+        ringsY={560}
       />
+      <FloatingShapes
+        name="Shapes – back"
+        shape={shape}
+        color={accent}
+        count={16}
+        seed={line2}
+        depth="back"
+        xMin={960}
+        xMax={1880}
+      />
+
+      {/* Elegant outlined name scrolling along the bottom */}
       <Marquee
-        name="Marquee bottom"
-        text={`${line1} ${line2} — `}
+        name="Marquee"
+        text={`${line1} ${line2} · `}
         fontFamily={displayFont}
-        fontSize={250}
-        color={`${accent}55`}
+        fontSize={200}
+        color={`${accent}66`}
         outline
-        speed={-9}
-        style={{ top: 860 }}
+        speed={-7}
+        style={{
+          top: 870,
+          fontStyle: "italic",
+          fontWeight: 700,
+          textTransform: "none",
+        }}
       />
 
       {/* Solid arch the bottle stands in */}
@@ -108,11 +128,10 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
           width: 580,
           height: 1000,
           borderRadius: "290px 290px 0 0",
-          background: accent,
+          background: `linear-gradient(180deg, ${accent} 0%, ${accent}CC 100%)`,
           translate: `0 ${interpolate(frame, [0, 16], [920, 0], { ...clamp, easing: ease })}px`,
         }}
       />
-      {/* Outline arch drawn slightly bigger, lagging behind */}
       <div
         style={{
           position: "absolute",
@@ -142,30 +161,49 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
         }}
       />
 
-      {/* The bottle drops in on a spring, then floats and sways */}
-      <Img
-        src={staticFile(bottle)}
+      {/* Bottle, price tag and spray all move together: drop in, squash, float, sway */}
+      <div
         style={{
           position: "absolute",
           left: CX - BOTTLE_W / 2,
-          top: BOTTLE_BOTTOM - BOTTLE_H,
+          top: BOTTLE_TOP,
           width: BOTTLE_W,
           height: BOTTLE_H,
           transformOrigin: "50% 100%",
           translate: `0 ${Math.min(0, interpolate(drop, [0, 1], [-1200, 0])) - 10 - float}px`,
-          rotate: `${interpolate(drop, [0, 1], [-18, 0]) + Math.sin(frame / 17) * 1.6}deg`,
+          rotate: `${interpolate(drop, [0, 1], [-18, 0]) + sway}deg`,
           scale: `${1 + beat * 0.015 + squash * 0.5} ${1 + beat * 0.015 - squash}`,
         }}
+      >
+        <Img
+          src={staticFile(bottle)}
+          style={{ width: BOTTLE_W, height: BOTTLE_H }}
+        />
+        <Mist
+          name="Spray"
+          delay={16}
+          style={{ left: BOTTLE_W / 2 - 70, top: 40 }}
+        />
+      </div>
+
+      {/* Price tag hangs from the arch, just clear of the bottle */}
+      <PriceTag
+        name="Price tag"
+        price={price}
+        accent={accent}
+        delay={18}
+        style={{ left: CX + 272, top: 330 }}
       />
 
-      <SpinBadge
-        name="Badge"
-        text="EAU DE PARFUM • 50 ML • SCENTATURE • "
-        size={210}
-        color="#111111"
-        fill="#ffffff"
-        delay={16}
-        style={{ left: CX + 170, top: 230 }}
+      <FloatingShapes
+        name="Shapes – front"
+        shape={shape}
+        color={accent}
+        count={3}
+        seed={line1}
+        depth="front"
+        xMin={1080}
+        xMax={1900}
       />
 
       <Sparkle
@@ -180,7 +218,7 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
         size={34}
         color="#ffffff"
         delay={20}
-        style={{ left: CX + 290, top: 560 }}
+        style={{ left: CX + 300, top: 560 }}
       />
       <Sparkle
         name="Sparkle 3"
@@ -189,53 +227,46 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
         delay={26}
         style={{ left: CX - 300, top: 760 }}
       />
-      <Sparkle
-        name="Sparkle 4"
-        size={26}
-        color={accent}
-        delay={30}
-        style={{ left: CX - 420, top: 520 }}
-      />
 
       {/* Copy block */}
-      <div style={{ position: "absolute", left: 130, top: 236, width: 900 }}>
+      <div style={{ position: "absolute", left: 130, top: 200, width: 900 }}>
         <TypeOn
-          text={`[${String(index).padStart(2, "0")}/${String(total).padStart(2, "0")}]  SCENTATURE PARFUMS`}
+          text={`${String(index).padStart(2, "0")} / ${String(total).padStart(2, "0")}   ·   SCENTATURE`}
           start={4}
           charsPerFrame={2.2}
           style={{
-            fontFamily: monoFont,
-            fontWeight: 700,
-            fontSize: 24,
-            letterSpacing: 3,
+            fontFamily: bodyFont,
+            fontWeight: 600,
+            fontSize: 22,
+            letterSpacing: 5,
             color: accent,
           }}
         />
 
-        <div style={{ marginTop: 18 }}>
+        <div style={{ marginTop: 14 }}>
           <KineticLine
             text={line1}
             start={6}
-            stagger={1.5}
+            stagger={1.4}
             style={{
               fontFamily: displayFont,
-              fontWeight: 800,
-              fontSize: nameSize,
-              lineHeight: 0.95,
-              letterSpacing: -3,
+              fontStyle: "italic",
+              fontWeight: 500,
+              fontSize: nameSize * 0.72,
+              lineHeight: 1.05,
               color: "#ffffff",
             }}
           />
           <KineticLine
-            text={line2}
+            text={line2.toUpperCase()}
             start={11}
-            stagger={1.5}
+            stagger={1.6}
             style={{
               fontFamily: displayFont,
               fontWeight: 800,
               fontSize: nameSize,
               lineHeight: 0.95,
-              letterSpacing: -3,
+              letterSpacing: 2,
               color: accent,
             }}
           />
@@ -243,12 +274,12 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
 
         <div
           style={{
-            marginTop: 22,
-            fontFamily: serifFont,
+            marginTop: 18,
+            fontFamily: displayFont,
             fontStyle: "italic",
-            fontSize: 64,
-            lineHeight: 1.05,
-            color: "rgba(255,255,255,0.92)",
+            fontSize: 44,
+            lineHeight: 1.1,
+            color: "rgba(255,255,255,0.88)",
           }}
         >
           {tagline.split(" ").map((word, i) => (
@@ -256,14 +287,14 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
               key={`${word}-${i}`}
               style={{
                 display: "inline-block",
-                marginRight: 16,
+                marginRight: 12,
                 opacity: interpolate(
                   frame,
                   [20 + i * 2, 28 + i * 2],
                   [0, 1],
                   clamp,
                 ),
-                translate: `0 ${interpolate(frame, [20 + i * 2, 30 + i * 2], [30, 0], { ...clamp, easing: ease })}px`,
+                translate: `0 ${interpolate(frame, [20 + i * 2, 30 + i * 2], [26, 0], { ...clamp, easing: ease })}px`,
               }}
             >
               {word}
@@ -271,50 +302,65 @@ const ProductSceneInner: React.FC<ProductSceneProps> = ({
           ))}
         </div>
 
+        {/* Price */}
         <div
           style={{
-            marginTop: 40,
+            marginTop: 30,
             display: "flex",
-            alignItems: "center",
-            gap: 28,
+            alignItems: "baseline",
+            gap: 18,
+            fontFamily: bodyFont,
+            color: "#ffffff",
+            opacity: interpolate(frame, [26, 34], [0, 1], clamp),
+            translate: `${interpolate(frame, [26, 38], [-40, 0], { ...clamp, easing: ease })}px 0`,
           }}
         >
-          <div
+          <span style={{ fontSize: 76, fontWeight: 700, lineHeight: 1 }}>
+            {price}
+          </span>
+          <span
+            style={{
+              fontSize: 20,
+              fontWeight: 500,
+              letterSpacing: 3,
+              color: "rgba(255,255,255,0.7)",
+            }}
+          >
+            50 ML · EAU DE PARFUM
+          </span>
+        </div>
+
+        <div
+          style={{
+            marginTop: 30,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 14,
+            fontFamily: bodyFont,
+            fontWeight: 600,
+            fontSize: 24,
+            letterSpacing: 3,
+            color: "#111111",
+            background: "#ffffff",
+            padding: "18px 34px",
+            borderRadius: 999,
+            clipPath: `inset(0 ${interpolate(frame, [32, 44], [100, 0], { ...clamp, easing: ease })}% 0 0 round 999px)`,
+          }}
+        >
+          {cta}
+          <span
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 14,
-              fontFamily: displayFont,
-              fontWeight: 800,
-              fontSize: 28,
-              letterSpacing: 2,
-              color: "#111111",
-              background: accent,
-              padding: "20px 36px",
-              borderRadius: 999,
-              clipPath: `inset(0 ${interpolate(frame, [30, 42], [100, 0], { ...clamp, easing: ease })}% 0 0 round 999px)`,
+              color: accent,
+              translate: `${beat * 8}px 0`,
             }}
           >
-            {cta}
-            <span style={{ display: "flex", translate: `${beat * 8}px 0` }}>
-              <Arrow size={28} />
-            </span>
-          </div>
-          <div
-            style={{
-              fontFamily: monoFont,
-              fontSize: 22,
-              letterSpacing: 2,
-              color: "rgba(255,255,255,0.75)",
-              opacity: interpolate(frame, [36, 44], [0, 1], clamp),
-            }}
-          >
-            EAU DE PARFUM — 50 ML
-          </div>
+            <Arrow size={26} />
+          </span>
         </div>
       </div>
 
-      <Grain opacity={0.22} />
+      <Grain opacity={0.2} />
     </>
   );
 };
@@ -324,14 +370,20 @@ export const ProductScene = Interactive.create({
   layout: "absolute-fill",
   schema: {
     ...Interactive.backgroundSchema,
-    line1: { type: "string", default: "BAD", description: "Name, first line" },
+    line1: { type: "string", default: "Bad", description: "Name, first line" },
     line2: {
       type: "string",
-      default: "GIRL",
+      default: "Girl",
       description: "Name, second line",
     },
     tagline: { type: "string", default: "", description: "Tagline" },
+    price: { type: "string", default: "₹299", description: "Price" },
     accent: { type: "color", default: "#E07A2E", description: "Accent colour" },
+    base: {
+      type: "color",
+      default: "#120A06",
+      description: "Background colour",
+    },
     cta: { type: "string", default: "SHOP NOW", description: "Button text" },
   },
 });

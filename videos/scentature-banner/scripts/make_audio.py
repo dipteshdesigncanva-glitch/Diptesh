@@ -3,12 +3,15 @@
 Everything is generated from scratch with numpy, so there are no licensing issues.
 Usage: python3 scripts/make_audio.py
 
-Music: 15 s, 120 BPM (one beat = 15 frames at 30 fps), A minor.
-  0-2 s   intro pad + no drums (logo reveal)
-  2-12 s  drop: four-on-the-floor kick, claps, hats, sub bass, pluck arp
-  12-15 s outro: drums thin out, chord rings and fades for a clean loop
+Music: 15 s, smooth R&B / lo-fi luxury feel. The grid is 120 BPM (one beat =
+15 frames at 30 fps) so cuts land on beats, but the drums play half-time.
+  0-2 s   electric-piano chord and an airy swell (logo reveal)
+  2-14 s  soft kick, finger snaps, swung shaker, round sub bass, e-piano comping,
+          a sparse bell melody and a little vinyl crackle
+  14-15 s drums drop out, the last chord rings and fades for a clean loop
 """
 
+import wave
 from pathlib import Path
 
 import numpy as np
@@ -18,7 +21,7 @@ BPM = 120
 BEAT = 60 / BPM
 DUR = 15.0
 OUT = Path(__file__).resolve().parent.parent / "public" / "audio"
-rng = np.random.default_rng(7)
+rng = np.random.default_rng(11)
 
 
 def t_axis(seconds: float) -> np.ndarray:
@@ -54,8 +57,7 @@ def sweep_filter(x: np.ndarray, centers: np.ndarray, q: float = 1.5) -> np.ndarr
     for start in range(0, len(pad) - win, hop):
         seg = pad[start : start + win] * window
         c = cpad[start + win // 2]
-        bw = c / q
-        gain = np.exp(-0.5 * ((f - c) / bw) ** 2)
+        gain = np.exp(-0.5 * ((f - c) / (c / q)) ** 2)
         out[start : start + win] += np.fft.irfft(np.fft.rfft(seg) * gain, win) * window
         norm[start : start + win] += window**2
     out = out / np.maximum(norm, 1e-6)
@@ -66,226 +68,219 @@ def reverb(x: np.ndarray, seconds: float = 1.6, mix: float = 0.25, seed: int = 1
     r = np.random.default_rng(seed)
     t = t_axis(seconds)
     ir = r.standard_normal(len(t)) * np.exp(-t * 6.9 / seconds)
-    ir = spectral_filter(ir, low=200, high=6000)
+    ir = spectral_filter(ir, low=250, high=5000)
     ir /= np.sqrt(np.sum(ir**2))
     n = len(x) + len(ir)
     wet = np.fft.irfft(np.fft.rfft(x, n) * np.fft.rfft(ir, n), n)[: len(x)]
     return x * (1 - mix) + wet * mix * 2.2
 
 
-def saw(freq: float, t: np.ndarray, harmonics: int = 18) -> np.ndarray:
-    out = np.zeros_like(t)
-    for k in range(1, harmonics + 1):
-        if freq * k > 9000:
-            break
-        out += np.sin(2 * np.pi * freq * k * t) / k
-    return out
-
-
 def place(buf: np.ndarray, sound: np.ndarray, at: float, gain: float = 1.0) -> None:
     i = int(at * SR)
     end = min(len(buf), i + len(sound))
-    if i < len(buf):
+    if 0 <= i < len(buf):
         buf[i:end] += sound[: end - i] * gain
 
 
-# --- Instruments -----------------------------------------------------------
+# --- Instruments -----------------------------------------------------------------
+
+def epiano(freq: float, seconds: float, velocity: float = 1.0) -> np.ndarray:
+    """Rhodes-style FM electric piano: soft bell attack that mellows into a sine."""
+    t = t_axis(seconds)
+    index = 1.6 * velocity * np.exp(-t * 5) + 0.25
+    mod = np.sin(2 * np.pi * freq * t)
+    tone = np.sin(2 * np.pi * freq * t + index * mod)
+    tine = np.sin(2 * np.pi * freq * 7.1 * t) * np.exp(-t * 28) * 0.12 * velocity
+    env = np.minimum(t / 0.004, 1) * np.exp(-t * 1.1) * np.clip((seconds - t) / 0.08, 0, 1)
+    return (tone + tine) * env * velocity
+
+
+def chord(notes: list[int], seconds: float, velocity: float = 1.0) -> np.ndarray:
+    out = np.zeros(int(seconds * SR))
+    for j, m in enumerate(notes):
+        # A tiny strum between notes makes it feel played
+        note = epiano(midi_hz(m), seconds - j * 0.012, velocity)
+        out[int(j * 0.012 * SR) : int(j * 0.012 * SR) + len(note)] += note
+    return out / len(notes)
+
+
+def bell(freq: float) -> np.ndarray:
+    t = t_axis(1.6)
+    tone = np.sin(2 * np.pi * freq * t + 0.8 * np.exp(-t * 3) * np.sin(2 * np.pi * freq * 3.5 * t))
+    return tone * np.exp(-t * 2.4) * np.minimum(t / 0.003, 1)
+
+
+def sub(freq: float, seconds: float) -> np.ndarray:
+    t = t_axis(seconds)
+    tone = np.sin(2 * np.pi * freq * t) + 0.15 * np.sin(4 * np.pi * freq * t)
+    env = np.minimum(t / 0.02, 1) * np.clip((seconds - t) / 0.06, 0, 1) * np.exp(-t * 0.8)
+    return tone * env
+
 
 def kick() -> np.ndarray:
-    t = t_axis(0.45)
-    freq = 42 + 110 * np.exp(-t * 28)
-    phase = 2 * np.pi * np.cumsum(freq) / SR
-    body = np.sin(phase) * np.exp(-t * 7.5)
-    click = spectral_filter(rng.standard_normal(len(t)), low=1500, high=6000) * np.exp(-t * 180) * 0.25
-    return np.tanh((body + click) * 1.6)
+    t = t_axis(0.5)
+    freq = 46 + 70 * np.exp(-t * 32)
+    body = np.sin(2 * np.pi * np.cumsum(freq) / SR) * np.exp(-t * 6.5)
+    return np.tanh(body * 1.3)
 
 
-def clap() -> np.ndarray:
-    t = t_axis(0.35)
-    noise = spectral_filter(rng.standard_normal(len(t)), low=900, high=5500)
-    env = np.zeros_like(t)
-    for d in (0.0, 0.011, 0.022):
-        env += np.where(t >= d, np.exp(-(t - d) * 60), 0)
-    env += np.exp(-t * 14) * 0.35
-    return noise * env * 0.5
+def snap() -> np.ndarray:
+    t = t_axis(0.4)
+    noise = spectral_filter(rng.standard_normal(len(t)), low=1400, high=6500)
+    env = np.exp(-t * 45) + 0.25 * np.exp(-t * 10)
+    tone = np.sin(2 * np.pi * 1800 * t) * np.exp(-t * 80) * 0.3
+    return reverb((noise + tone) * env * 0.5, 1.2, 0.4, 21)
 
 
-def hat(open_: bool = False) -> np.ndarray:
-    t = t_axis(0.3 if open_ else 0.07)
-    noise = spectral_filter(rng.standard_normal(len(t)), low=7000, high=16000)
-    return noise * np.exp(-t * (14 if open_ else 70)) * 0.35
+def shaker() -> np.ndarray:
+    t = t_axis(0.09)
+    noise = spectral_filter(rng.standard_normal(len(t)), low=6000, high=14000)
+    return noise * np.sin(np.pi * t / 0.09) ** 2 * 0.25
 
 
-def pluck(freq: float) -> np.ndarray:
-    t = t_axis(0.6)
-    tone = np.sin(2 * np.pi * freq * t) + 0.35 * np.sin(4 * np.pi * freq * t) + 0.12 * np.sin(6 * np.pi * freq * t)
-    return tone * np.exp(-t * 9) * np.minimum(t * 400, 1)
-
-
-def pad_chord(notes: list[int], seconds: float) -> np.ndarray:
-    t = t_axis(seconds)
-    out = np.zeros_like(t)
-    for m in notes:
-        f = midi_hz(m)
-        for cents in (-8, 0, 8):
-            out += saw(f * 2 ** (cents / 1200), t + rng.random() * 0.01)
-    out = spectral_filter(out, low=90, high=1400)
-    env = np.minimum(t / 0.35, 1) * np.minimum((seconds - t) / 0.35, 1)
-    return out * env / (len(notes) * 3)
-
-
-# --- Music -------------------------------------------------------------------
+# --- Music -----------------------------------------------------------------------
 
 def make_music() -> np.ndarray:
     n = int(DUR * SR)
-    drums = np.zeros(n)
+    keys = np.zeros(n)
     bass = np.zeros(n)
-    pads = np.zeros(n)
-    arp = np.zeros(n)
+    drums = np.zeros(n)
+    bells = np.zeros(n)
 
-    # Bars are 2 s. Am, Am, F, C, G, Am, F, Am
-    progression = [
-        (0, [57, 60, 64], 45),
-        (2, [57, 60, 64], 45),
-        (4, [53, 57, 60], 41),
-        (6, [55, 60, 64], 48),
-        (8, [55, 59, 62], 43),
-        (10, [57, 60, 64], 45),
-        (12, [53, 57, 60], 41),
-        (14, [57, 60, 64], 45),
-    ]
+    # Bars are 2 s: Am9, Fmaj9, Cmaj9, Gadd9 (smooth, jazzy voicings)
+    voicings = {
+        "Am9": ([60, 64, 67, 71], 45),
+        "Fmaj9": ([57, 64, 67, 72], 41),
+        "Cmaj9": ([59, 64, 67, 74], 48),
+        "Gadd9": ([59, 62, 69, 74], 43),
+    }
+    progression = ["Am9", "Am9", "Fmaj9", "Cmaj9", "Gadd9", "Am9", "Fmaj9", "Am9"]
 
-    for start, chord, root in progression:
-        length = 2.6 if start < 14 else 1.0
-        place(pads, pad_chord(chord + [chord[0] + 12], length), start)
+    for bar, name in enumerate(progression):
+        start = bar * 2.0
+        notes, root = voicings[name]
+        if bar == 0:
+            place(keys, chord(notes, 2.2, 0.8), 0.0)
+            continue
+        if bar == 7:
+            place(keys, chord(notes, 1.0, 0.8), start)
+            place(bass, sub(midi_hz(root - 12), 0.9), start, 0.8)
+            continue
+        # E-piano comping: beat 1 long, the "and" of 2 short, beat 4 short
+        place(keys, chord(notes, 1.2, 0.9), start)
+        place(keys, chord(notes, 0.45, 0.55), start + 1.5 * BEAT)
+        place(keys, chord(notes, 0.6, 0.6), start + 3 * BEAT)
+        # Round sub bass: root, root, fifth
+        place(bass, sub(midi_hz(root - 12), 0.9), start, 0.8)
+        place(bass, sub(midi_hz(root - 12), 0.4), start + 1.5 * BEAT, 0.6)
+        place(bass, sub(midi_hz(root - 5), 0.45), start + 3 * BEAT, 0.6)
 
-        if 2 <= start < 14:
-            # Sub bass on the off-beat 8ths, ducked under the kick
-            for i in range(4):
-                tb = t_axis(BEAT * 0.45)
-                note = np.sin(2 * np.pi * midi_hz(root - 12) * tb)
-                note = np.tanh(note * 1.8) * np.minimum(tb * 300, 1) * np.exp(-tb * 3)
-                place(bass, note, start + i * BEAT + BEAT / 2, 0.55)
+    # Half-time drums from the drop (2 s) to 14 s
+    k, s, sh = kick(), snap(), shaker()
+    for bar in range(1, 7):
+        start = bar * 2.0
+        place(drums, k, start, 0.85)
+        place(drums, k, start + 2.5 * BEAT, 0.6)
+        place(drums, s, start + 2 * BEAT, 0.7)
+        for step in range(8):
+            swing = 0.035 if step % 2 else 0.0
+            place(drums, sh, start + step * BEAT / 2 + swing, 0.5 if step % 2 else 0.8)
 
-            # 16th-note pluck arpeggio
-            pattern = [0, 2, 1, 3, 2, 1, 3, 2]
-            arp_notes = [m + 12 for m in chord] + [chord[0] + 24]
-            for i in range(16):
-                if start >= 12 and i >= 8:
-                    break
-                note = arp_notes[pattern[i % 8]]
-                place(arp, pluck(midi_hz(note)), start + i * BEAT / 4, 0.18 if i % 4 else 0.26)
+    # Sparse bell melody in A minor pentatonic
+    melody = [(2.0, 76), (2.75, 79), (3.5, 81), (6.0, 79), (6.5, 76), (7.25, 74), (10.0, 76), (10.75, 79), (11.5, 84), (12.0, 81)]
+    for at, m in melody:
+        place(bells, bell(midi_hz(m)), at, 0.22)
 
-    k, c, h, oh = kick(), clap(), hat(), hat(True)
-    beats = int(DUR / BEAT)
-    for b in range(beats):
-        at = b * BEAT
-        if 2 <= at < 14:
-            place(drums, k, at, 0.9)
-            if b % 2 == 1:
-                place(drums, c, at, 0.55)
-            place(drums, h if b % 4 != 3 else oh, at + BEAT / 2, 0.5)
-            if at >= 4:
-                place(drums, h, at + BEAT / 4, 0.18)
-                place(drums, h, at + 3 * BEAT / 4, 0.18)
-        if 1.0 <= at < 2 and b % 1 == 0:
-            # Clap roll building into the drop
-            for s in range(4):
-                place(drums, c, at + s * BEAT / 4, 0.12 + 0.08 * s)
+    # Vinyl crackle
+    crackle = np.zeros(n)
+    pops = rng.integers(0, n, 140)
+    crackle[pops] = rng.uniform(-1, 1, len(pops))
+    crackle = spectral_filter(crackle, low=900, high=7000) * 0.6 + spectral_filter(rng.standard_normal(n), low=3000, high=9000) * 0.004
 
-    # Sidechain: duck pads and bass on every kick in the drop
+    # Gentle sidechain on the kicks keeps the low end clean
     duck = np.ones(n)
-    for b in range(beats):
-        at = b * BEAT
-        if 2 <= at < 14:
-            i = int(at * SR)
-            td = t_axis(BEAT)
-            env = 1 - 0.65 * np.exp(-td * 9)
-            duck[i : i + len(env)] = env[: n - i]
-    pads *= duck
-    bass *= duck
+    for bar in range(1, 7):
+        for off in (0, 2.5 * BEAT):
+            i = int((bar * 2.0 + off) * SR)
+            td = t_axis(0.35)
+            duck[i : i + len(td)] = np.minimum(duck[i : i + len(td)], 1 - 0.35 * np.exp(-td * 12))
 
-    # Dotted-8th echo on the arp
-    delay = int(BEAT * 0.75 * SR)
-    echoed = arp.copy()
-    echoed[delay:] += arp[:-delay] * 0.35
-    echoed[2 * delay :] += arp[: -2 * delay] * 0.15
+    keys_wet = reverb(keys, 2.4, 0.3, 2)
+    mix = keys_wet * 0.9 * duck + bass * 0.75 * duck + drums * 0.8 + reverb(bells, 2.6, 0.5, 3) * 0.8 + crackle
+    mix = spectral_filter(mix, low=28, high=11000)
 
-    mix = drums * 0.95 + bass * 0.9 + reverb(pads, 2.2, 0.35, 2) * 0.55 + reverb(echoed, 1.4, 0.3, 3) * 0.6
-    stereo = np.stack([mix, mix], axis=1)
-    # Slight stereo width on pads and arp
-    width = reverb(pads + echoed, 0.9, 1.0, 9) * 0.12
-    stereo[:, 0] += width
-    stereo[:, 1] -= width
-
+    # Stereo: tremolo pans the e-piano gently left and right
     t = t_axis(DUR)
-    fade = np.minimum(t / 0.05, 1) * np.clip((DUR - t) / 1.2, 0, 1)
+    pan = 0.5 + 0.18 * np.sin(2 * np.pi * t / (4 * BEAT))
+    left = mix + keys_wet * 0.25 * (pan - 0.5)
+    right = mix - keys_wet * 0.25 * (pan - 0.5)
+    stereo = np.stack([left, right], axis=1)
+
+    fade = np.minimum(t / 0.03, 1) * np.clip((DUR - t) / 1.0, 0, 1)
     stereo *= fade[:, None]
-    stereo = np.tanh(stereo / np.max(np.abs(stereo)) * 1.2)
+    stereo = np.tanh(stereo / np.max(np.abs(stereo)) * 1.1)
     return stereo / np.max(np.abs(stereo)) * 0.89
 
 
-# --- Sound effects -------------------------------------------------------------
+# --- Sound effects -----------------------------------------------------------------
 
 def make_whoosh() -> np.ndarray:
+    """Soft silky swoosh for the colour-panel wipes."""
     seconds = 0.7
     t = t_axis(seconds)
-    noise = rng.standard_normal(len(t))
-    centers = 300 + 4200 * np.sin(np.pi * np.clip(t / seconds, 0, 1)) ** 2
-    s = sweep_filter(noise, centers, q=1.2)
-    env = np.sin(np.pi * (t / seconds) ** 1.3) ** 2
-    s = reverb(s * env, 0.8, 0.3, 4)
+    centers = 250 + 2600 * np.sin(np.pi * np.clip(t / seconds, 0, 1)) ** 2
+    s = sweep_filter(rng.standard_normal(len(t)), centers, q=1.0)
+    s = reverb(s * np.sin(np.pi * (t / seconds) ** 1.3) ** 2, 0.8, 0.3, 4)
     return s / np.max(np.abs(s)) * 0.8
 
 
-def make_impact() -> np.ndarray:
-    t = t_axis(1.8)
-    freq = 28 + 70 * np.exp(-t * 12)
-    boom = np.sin(2 * np.pi * np.cumsum(freq) / SR) * np.exp(-t * 3.2)
-    crack = spectral_filter(rng.standard_normal(len(t)), low=300, high=5000) * np.exp(-t * 25) * 0.6
-    s = reverb(np.tanh((boom + crack) * 2.0), 1.6, 0.3, 5)
-    return s / np.max(np.abs(s)) * 0.9
+def make_tink() -> np.ndarray:
+    """A glass bottle touching down: bright inharmonic partials that ring briefly."""
+    t = t_axis(1.4)
+    s = np.zeros_like(t)
+    for ratio, amp, decay in ((1.0, 1.0, 6), (2.32, 0.6, 9), (4.25, 0.35, 13), (6.63, 0.2, 18)):
+        s += np.sin(2 * np.pi * 2350 * ratio * t) * amp * np.exp(-t * decay)
+    click = spectral_filter(rng.standard_normal(len(t)), low=3000) * np.exp(-t * 400) * 0.3
+    s = reverb(s + click, 1.2, 0.3, 7)
+    return s / np.max(np.abs(s)) * 0.7
+
+
+def make_spray() -> np.ndarray:
+    """Perfume atomiser 'pssht': a pump click and a short hiss of mist."""
+    t = t_axis(0.8)
+    hiss = spectral_filter(rng.standard_normal(len(t)), low=3500, high=11000, order=3)
+    env = np.minimum(t / 0.012, 1) * np.where(t < 0.28, 1.0, np.exp(-(t - 0.28) * 14))
+    click = spectral_filter(rng.standard_normal(len(t)), low=800, high=4000) * np.exp(-t * 300) * 0.5
+    s = reverb(hiss * env * 0.7 + click, 0.6, 0.2, 9)
+    return s / np.max(np.abs(s)) * 0.65
 
 
 def make_shimmer() -> np.ndarray:
     t = t_axis(2.2)
     s = np.zeros_like(t)
-    notes = [81, 84, 88, 93, 96, 100, 105]
-    for i, m in enumerate(notes):
-        start = i * 0.06
+    for i, m in enumerate([81, 84, 88, 93, 96, 100]):
+        start = i * 0.07
         tt = np.clip(t - start, 0, None)
         f = midi_hz(m)
-        bell = (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(2 * np.pi * f * 2.76 * tt)) * np.exp(-tt * 3.5)
-        s += np.where(t >= start, bell, 0) * (0.6 - i * 0.05)
+        ring = (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(2 * np.pi * f * 2.76 * tt)) * np.exp(-tt * 3.5)
+        s += np.where(t >= start, ring, 0) * (0.6 - i * 0.05)
     s = reverb(s, 2.0, 0.55, 6)
+    return s / np.max(np.abs(s)) * 0.55
+
+
+def make_swell() -> np.ndarray:
+    """Airy rise into the drop: filtered noise and a soft chord that grow together."""
+    seconds = 2.0
+    t = t_axis(seconds)
+    air = sweep_filter(rng.standard_normal(len(t)), 300 * (12 ** (t / seconds)), q=1.6)
+    pad = sum(np.sin(2 * np.pi * midi_hz(m) * t) for m in (69, 72, 76, 79)) / 4
+    s = (air / np.max(np.abs(air)) * 0.6 + pad * 0.5) * (t / seconds) ** 2.2
+    s *= np.clip((seconds - t) / 0.03, 0, 1)
+    s = reverb(s, 1.4, 0.3, 5)
     return s / np.max(np.abs(s)) * 0.6
 
 
-def make_riser() -> np.ndarray:
-    seconds = 2.0
-    t = t_axis(seconds)
-    noise = rng.standard_normal(len(t))
-    centers = 200 * (40 ** (t / seconds))
-    s = sweep_filter(noise, centers, q=2.0) * (t / seconds) ** 2
-    tone = np.sin(2 * np.pi * np.cumsum(110 * 4 ** (t / seconds)) / SR) * (t / seconds) ** 3 * 0.25
-    s = s / np.max(np.abs(s)) + tone
-    s *= np.clip((seconds - t) / 0.02, 0, 1)
-    return s / np.max(np.abs(s)) * 0.7
-
-
-def make_pop() -> np.ndarray:
-    """Short, bubbly pop for the bottle landing and badges popping in."""
-    t = t_axis(0.35)
-    freq = 1400 * np.exp(-t * 30) + 380
-    body = np.sin(2 * np.pi * np.cumsum(freq) / SR) * np.exp(-t * 22)
-    thump = np.sin(2 * np.pi * np.cumsum(120 * np.exp(-t * 18) + 50) / SR) * np.exp(-t * 16) * 0.8
-    s = reverb(body * 0.6 + thump, 0.6, 0.18, 8)
-    return s / np.max(np.abs(s)) * 0.8
-
-
 def save(name: str, data: np.ndarray) -> None:
-    import wave
-
     if data.ndim == 1:
         data = np.stack([data, data], axis=1)
     pcm = (np.clip(data, -1, 1) * 32767).astype("<i2")
@@ -298,10 +293,12 @@ def save(name: str, data: np.ndarray) -> None:
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
+    for old in ("impact.wav", "pop.wav", "riser.wav"):
+        (OUT / old).unlink(missing_ok=True)
     save("music.wav", make_music())
     save("whoosh.wav", make_whoosh())
-    save("impact.wav", make_impact())
+    save("tink.wav", make_tink())
+    save("spray.wav", make_spray())
     save("shimmer.wav", make_shimmer())
-    save("riser.wav", make_riser())
-    save("pop.wav", make_pop())
+    save("swell.wav", make_swell())
     print("done")

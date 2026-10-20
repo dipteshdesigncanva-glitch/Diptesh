@@ -10,22 +10,27 @@ import {
   useVideoConfig,
 } from "remotion";
 import { Arrow } from "../elements/Arrow";
+import { FloatingShapes } from "../elements/FloatingShapes";
 import { Grain } from "../elements/Grain";
 import { Marquee } from "../elements/Marquee";
 import { Sparkle } from "../elements/Sparkle";
-import { displayFont, monoFont } from "../fonts";
+import { bodyFont, displayFont } from "../fonts";
 
 type OutroSceneProps = {
+  readonly headline: string;
+  readonly price: string;
   readonly cta: string;
 };
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-const ARCH_W = 300;
-const GAP = 56;
+const ARCH_W = 290;
+const GAP = 50;
 const ROW_LEFT = (1920 - (ARCH_W * 4 + GAP * 3)) / 2;
-const BOTTLE_H = 430;
+const ARCH_TOP = 330;
+const BASE = 790;
+const BOTTLE_H = 400;
 const BOTTLE_W = (493 / 892) * BOTTLE_H;
 
 const lineUp = [
@@ -35,23 +40,82 @@ const lineUp = [
   { src: "bottles/hawas-ice.png", accent: "#3B6BFF" },
 ];
 
-const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
+const OutroSceneInner: React.FC<OutroSceneProps> = ({
+  headline,
+  price,
+  cta,
+}) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const beat = Math.exp(-(frame % 15) / 4);
 
   return (
     <>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(180deg, #0A0A0A 0%, #141018 100%)",
+        }}
+      />
+      <FloatingShapes
+        name="Shapes"
+        shape="mixed"
+        color="#F3E6CF"
+        count={14}
+        seed="outro"
+        depth="back"
+        xMin={20}
+        xMax={270}
+      />
+      <FloatingShapes
+        name="Shapes right"
+        shape="mixed"
+        color="#F3E6CF"
+        count={14}
+        seed="outro-r"
+        depth="back"
+        xMin={1650}
+        xMax={1900}
+      />
+
       <Img
         src={staticFile("logo-white.png")}
         style={{
           position: "absolute",
-          left: (1920 - 440) / 2,
-          top: 56,
-          width: 440,
+          left: (1920 - 380) / 2,
+          top: 46,
+          width: 380,
           clipPath: `inset(0 ${interpolate(frame, [0, 16], [100, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) })}% 0 0)`,
         }}
       />
+      <div
+        style={{
+          position: "absolute",
+          top: 196,
+          width: "100%",
+          textAlign: "center",
+          fontFamily: displayFont,
+          fontStyle: "italic",
+          fontWeight: 500,
+          fontSize: 58,
+          color: "#ffffff",
+          opacity: interpolate(frame, [6, 16], [0, 1], clamp),
+          translate: `0 ${interpolate(frame, [6, 20], [24, 0], { ...clamp, easing: ease })}px`,
+        }}
+      >
+        {headline}{" "}
+        <span
+          style={{
+            fontFamily: bodyFont,
+            fontStyle: "normal",
+            fontWeight: 700,
+            color: "#F3C96B",
+          }}
+        >
+          {price}
+        </span>
+      </div>
 
       {lineUp.map((item, i) => {
         const left = ROW_LEFT + i * (ARCH_W + GAP);
@@ -66,9 +130,9 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
               style={{
                 position: "absolute",
                 left,
-                top: 300,
+                top: ARCH_TOP,
                 width: ARCH_W,
-                height: 520,
+                height: BASE - ARCH_TOP + 40,
                 borderRadius: `${ARCH_W / 2}px ${ARCH_W / 2}px 0 0`,
                 background: item.accent,
                 translate: `0 ${interpolate(frame, [2 + i * 3, 18 + i * 3], [700, 0], { ...clamp, easing: ease })}px`,
@@ -79,7 +143,7 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
               style={{
                 position: "absolute",
                 left: left + (ARCH_W - BOTTLE_W) / 2,
-                top: 800 - BOTTLE_H,
+                top: BASE - BOTTLE_H,
                 width: BOTTLE_W,
                 height: BOTTLE_H,
                 transformOrigin: "50% 100%",
@@ -97,21 +161,21 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
         style={{
           position: "absolute",
           left: 0,
-          top: 820,
+          top: BASE + 40,
           width: 1920,
-          height: 64,
-          background: "#ffffff",
+          height: 60,
+          background: "#F3E6CF",
         }}
       />
       <Marquee
         name="Names strip"
-        text="BAD GIRL • FLORAL KISS • HAWAS CLASSIC • HAWAS ICE • "
-        fontFamily={monoFont}
-        fontSize={30}
-        color="#111111"
+        text="BAD GIRL  •  FLORAL KISS  •  HAWAS CLASSIC  •  HAWAS ICE  •  ₹299 EACH  •  "
+        fontFamily={bodyFont}
+        fontSize={24}
+        color="#151515"
         outline={false}
         speed={6}
-        style={{ top: 837 }}
+        style={{ top: BASE + 58, fontWeight: 600, letterSpacing: 3 }}
       />
 
       <Sparkle
@@ -119,14 +183,14 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
         size={60}
         color="#ffffff"
         delay={24}
-        style={{ left: ROW_LEFT - 70, top: 280 }}
+        style={{ left: ROW_LEFT - 80, top: 330 }}
       />
       <Sparkle
         name="Sparkle 2"
         size={36}
-        color="#ffffff"
+        color="#F3C96B"
         delay={30}
-        style={{ left: 1920 - ROW_LEFT + 20, top: 360 }}
+        style={{ left: 1920 - ROW_LEFT + 30, top: 420 }}
       />
 
       <div
@@ -143,13 +207,13 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
             display: "flex",
             alignItems: "center",
             gap: 16,
-            fontFamily: displayFont,
-            fontWeight: 800,
-            fontSize: 30,
-            letterSpacing: 2,
+            fontFamily: bodyFont,
+            fontWeight: 600,
+            fontSize: 26,
+            letterSpacing: 3,
             color: "#111111",
             background: "#ffffff",
-            padding: "22px 48px",
+            padding: "20px 46px",
             borderRadius: 999,
             scale: interpolate(frame, [30, 42], [0, 1], {
               ...clamp,
@@ -159,12 +223,12 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({ cta }) => {
         >
           {cta}
           <span style={{ display: "flex", translate: `${beat * 8}px 0` }}>
-            <Arrow size={30} />
+            <Arrow size={28} />
           </span>
         </div>
       </div>
 
-      <Grain opacity={0.22} />
+      <Grain opacity={0.2} />
 
       {/* Fade to black so the banner loops cleanly back into the intro */}
       <div
@@ -189,6 +253,12 @@ export const OutroScene = Interactive.create({
   layout: "absolute-fill",
   schema: {
     ...Interactive.backgroundSchema,
+    headline: {
+      type: "string",
+      default: "Four signature scents, each",
+      description: "Headline",
+    },
+    price: { type: "string", default: "₹299", description: "Price" },
     cta: {
       type: "string",
       default: "SHOP THE COLLECTION",

@@ -24,61 +24,71 @@ export const ScentatureBanner = () => {
           from={2 * fps}
           durationInFrames={2.5 * fps}
           bottle="bottles/bad-girl.png"
-          line1="BAD"
-          line2="GIRL"
+          line1="Bad"
+          line2="Girl"
+          shape="drop"
+          base="#120A06"
+          price="₹299"
           tagline="Bold, warm & unforgettable."
           accent="#E07A2E"
           index={1}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#170D07" }}
         />
         <ProductScene
           name="Floral Kiss"
           from={4.5 * fps}
           durationInFrames={2.5 * fps}
           bottle="bottles/floral-kiss.png"
-          line1="FLORAL"
-          line2="KISS"
+          line1="Floral"
+          line2="Kiss"
+          shape="petal"
+          base="#14060C"
+          price="₹299"
           tagline="Soft, romantic & in bloom."
           accent="#FF2E7E"
           index={2}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#16060D" }}
         />
         <ProductScene
           name="Hawas Classic"
           from={7 * fps}
           durationInFrames={2.5 * fps}
           bottle="bottles/hawas-classic.png"
-          line1="HAWAS"
-          line2="CLASSIC"
+          line1="Hawas"
+          line2="Classic"
+          shape="leaf"
+          base="#04110A"
+          price="₹299"
           tagline="Fresh, confident & timeless."
           accent="#22C55E"
           index={3}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#04130A" }}
         />
         <ProductScene
           name="Hawas Ice"
           from={9.5 * fps}
           durationInFrames={2.5 * fps}
           bottle="bottles/hawas-ice.png"
-          line1="HAWAS"
-          line2="ICE"
+          line1="Hawas"
+          line2="Ice"
+          shape="ice"
+          base="#050A18"
+          price="₹299"
           tagline="Cool, crisp & electric."
           accent="#3B6BFF"
           index={4}
           total={4}
           cta="SHOP NOW"
-          style={{ backgroundColor: "#050A1B" }}
         />
         <OutroScene
           name="Outro – line-up"
           from={12 * fps}
           durationInFrames={3 * fps}
+          headline="Four signature scents, each"
+          price="₹299"
           cta="SHOP THE COLLECTION"
           style={{ backgroundColor: "#0A0A0A" }}
         />
@@ -123,105 +133,123 @@ export const ScentatureBanner = () => {
         />
       </Track>
 
-      <Audio name="Music" src={staticFile("audio/music.wav")} volume={0.62} />
+      <Audio name="Music" src={staticFile("audio/music.wav")} volume={0.75} />
 
       <Track name="Sound effects">
-        <Audio name="Riser" src={staticFile("audio/riser.wav")} volume={0.45} />
+        <Audio name="Swell" src={staticFile("audio/swell.wav")} volume={0.4} />
         <Audio
           name="Shimmer – logo"
           from={18}
           src={staticFile("audio/shimmer.wav")}
-          volume={0.5}
+          volume={0.45}
         />
         <Audio
           name="Whoosh – Bad Girl"
           from={2 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
-          volume={0.4}
-        />
-        <Audio
-          name="Impact – Bad Girl"
-          from={2 * fps}
-          src={staticFile("audio/impact.wav")}
           volume={0.3}
         />
         <Audio
-          name="Pop – Bad Girl"
+          name="Glass – Bad Girl"
           from={2 * fps + 13}
-          src={staticFile("audio/pop.wav")}
-          volume={0.35}
+          src={staticFile("audio/tink.wav")}
+          volume={0.4}
+        />
+        <Audio
+          name="Spray – Bad Girl"
+          from={2 * fps + 16}
+          src={staticFile("audio/spray.wav")}
+          volume={0.45}
         />
         <Audio
           name="Whoosh – Floral Kiss"
           from={4.5 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
-          volume={0.4}
-        />
-        <Audio
-          name="Impact – Floral Kiss"
-          from={4.5 * fps}
-          src={staticFile("audio/impact.wav")}
           volume={0.3}
         />
         <Audio
-          name="Pop – Floral Kiss"
+          name="Glass – Floral Kiss"
           from={4.5 * fps + 13}
-          src={staticFile("audio/pop.wav")}
-          volume={0.35}
+          src={staticFile("audio/tink.wav")}
+          volume={0.4}
+        />
+        <Audio
+          name="Spray – Floral Kiss"
+          from={4.5 * fps + 16}
+          src={staticFile("audio/spray.wav")}
+          volume={0.45}
         />
         <Audio
           name="Whoosh – Hawas Classic"
           from={7 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
-          volume={0.4}
-        />
-        <Audio
-          name="Impact – Hawas Classic"
-          from={7 * fps}
-          src={staticFile("audio/impact.wav")}
           volume={0.3}
         />
         <Audio
-          name="Pop – Hawas Classic"
+          name="Glass – Hawas Classic"
           from={7 * fps + 13}
-          src={staticFile("audio/pop.wav")}
-          volume={0.35}
+          src={staticFile("audio/tink.wav")}
+          volume={0.4}
+        />
+        <Audio
+          name="Spray – Hawas Classic"
+          from={7 * fps + 16}
+          src={staticFile("audio/spray.wav")}
+          volume={0.45}
         />
         <Audio
           name="Whoosh – Hawas Ice"
           from={9.5 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
-          volume={0.4}
-        />
-        <Audio
-          name="Impact – Hawas Ice"
-          from={9.5 * fps}
-          src={staticFile("audio/impact.wav")}
           volume={0.3}
         />
         <Audio
-          name="Pop – Hawas Ice"
+          name="Glass – Hawas Ice"
           from={9.5 * fps + 13}
-          src={staticFile("audio/pop.wav")}
-          volume={0.35}
+          src={staticFile("audio/tink.wav")}
+          volume={0.4}
+        />
+        <Audio
+          name="Spray – Hawas Ice"
+          from={9.5 * fps + 16}
+          src={staticFile("audio/spray.wav")}
+          volume={0.45}
         />
         <Audio
           name="Whoosh – Outro"
           from={12 * fps - 12}
           src={staticFile("audio/whoosh.wav")}
-          volume={0.4}
-        />
-        <Audio
-          name="Impact – Outro"
-          from={12 * fps}
-          src={staticFile("audio/impact.wav")}
           volume={0.3}
         />
         <Audio
+          name="Glass – line-up 1"
+          from={12 * fps + 17}
+          src={staticFile("audio/tink.wav")}
+          volume={0.25}
+        />
+        <Audio
+          name="Glass – line-up 2"
+          from={12 * fps + 21}
+          src={staticFile("audio/tink.wav")}
+          volume={0.25}
+        />
+        <Audio
+          name="Glass – line-up 3"
+          from={12 * fps + 25}
+          src={staticFile("audio/tink.wav")}
+          volume={0.25}
+        />
+        <Audio
+          name="Glass – line-up 4"
+          from={12 * fps + 29}
+          src={staticFile("audio/tink.wav")}
+          volume={0.25}
+        />
+        <Audio
           name="Shimmer – Outro"
-          from={12 * fps + 30}
+          from={12 * fps + 34}
           src={staticFile("audio/shimmer.wav")}
-          volume={0.45}
+          volume={0.4}
         />
       </Track>
     </AbsoluteFill>
