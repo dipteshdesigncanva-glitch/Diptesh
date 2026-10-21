@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GTM Command Center Setup Guide</title>
+    <style>
+      @font-face { font-family: "InterHF"; src: url("../assets/fonts/Inter-Medium.otf"); font-weight: 500; }
+      @font-face { font-family: "InterHF"; src: url("../assets/fonts/Inter-SemiBold.otf"); font-weight: 600; }
+      @font-face { font-family: "InterHF"; src: url("../assets/fonts/Inter-Bold.otf"); font-weight: 700; }
+      @font-face { font-family: "InterHF"; src: url("../assets/fonts/Inter-ExtraBold.otf"); font-weight: 800; }
+      @font-face { font-family: "InterHF"; src: url("../assets/fonts/Inter-Black.otf"); font-weight: 900; }
+      @page { size: A4; margin: 0; }
+      :root {
+        --bg: #07050c;
+        --ink: #f5f0ff;
+        --soft: #d6cbef;
+        --muted: #a397c4;
+        --violet: #a66bff;
+        --violet-soft: #c9a6ff;
+        --hl: #8b3dff;
+        --card: #150b26;
+        --line: rgba(166, 107, 255, 0.35);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { background: var(--bg); }
+      body { font-family: "InterHF", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .page {
+        position: relative; width: 794px; height: 1123px; overflow: hidden; page-break-after: always; break-after: page;
+        padding: 64px 60px 90px;
+        background:
+          radial-gradient(ellipse 70% 40% at 80% 0%, rgba(110, 40, 200, 0.4) 0%, rgba(7, 5, 12, 0) 70%),
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px) 0 0 / 40px 40px,
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px) 0 0 / 40px 40px,
+          var(--bg);
+      }
+      .tight h2 { margin: 18px 0 8px; }
+      .tight td { padding: 9px 14px; }
+      .tight .tile { padding: 12px 14px; }
+      .tight li { margin: 3px 0; }
+      .page:last-child { page-break-after: auto; break-after: auto; }
+      .foot { position: absolute; left: 60px; right: 60px; bottom: 34px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; }
+      .foot span:first-child { display: flex; align-items: center; gap: 10px; }
+      .foot img { width: 26px; height: 26px; border-radius: 50%; }
+      .stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: linear-gradient(90deg, #6d28d9, #a855f7); }
+
+      .kicker { display: inline-block; padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 900; letter-spacing: 0.08em; background: var(--hl); color: #fff; }
+      h1 { font-size: 46px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; margin-top: 16px; }
+      h1 .v, .v { color: var(--violet); }
+      h2 { font-size: 20px; font-weight: 800; margin: 26px 0 10px; }
+      p, li { font-size: 15px; line-height: 1.55; color: var(--soft); }
+      .lead { font-size: 17px; color: var(--soft); margin-top: 12px; }
+      ol, ul { padding-left: 22px; }
+      li { margin: 5px 0; }
+      li b, p b { color: var(--ink); }
+
+      .prompt { position: relative; margin-top: 10px; padding: 16px 18px 16px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--hl); font-size: 14px; line-height: 1.55; color: var(--ink); }
+      .prompt .tag { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 900; letter-spacing: 0.12em; color: var(--violet-soft); }
+      .code { margin-top: 10px; padding: 14px 18px; border-radius: 12px; background: #000; border: 1px solid rgba(255, 255, 255, 0.12); font-family: "DejaVu Sans Mono", monospace; font-size: 13px; line-height: 1.7; color: #e9ddff; white-space: pre; }
+      .note { margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: rgba(139, 61, 255, 0.12); border: 1px solid var(--line); font-size: 13.5px; line-height: 1.5; color: var(--soft); }
+      .note b { color: var(--violet-soft); }
+
+      table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 8px; }
+      td, th { text-align: left; font-size: 14px; padding: 12px 14px; vertical-align: top; }
+      th { font-size: 11px; letter-spacing: 0.12em; color: var(--muted); padding: 0 14px; }
+      td { background: var(--card); color: var(--soft); }
+      td:first-child { border-radius: 12px 0 0 12px; color: var(--ink); font-weight: 800; }
+      td:last-child { border-radius: 0 12px 12px 0; }
+
+      .steps { display: flex; gap: 8px; margin-top: 14px; }
+      .steps i { flex: 1; height: 8px; border-radius: 4px; background: rgba(166, 107, 255, 0.2); }
+      .steps i.on { background: linear-gradient(90deg, #7c2cff, #c9a6ff); }
+      .check { list-style: none; padding: 0; }
+      .check li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; margin: 8px 0; border-radius: 12px; background: var(--card); }
+      .check li::before { content: ""; flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 5px; border: 2px solid var(--violet); }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+      .tile { padding: 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+      .tile b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 4px; }
+      .tile span { font-size: 13.5px; color: var(--soft); line-height: 1.45; }
+
+      /* cover page */
+      .cover { padding: 0; display: flex; flex-direction: column; align-items: center; text-align: center; background: radial-gradient(ellipse 80% 45% at 50% 40%, rgba(110, 40, 200, 0.55) 0%, rgba(40, 12, 80, 0.3) 50%, rgba(7, 5, 12, 0) 80%), linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 40px 40px, linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 40px 40px, var(--bg); }
+      .cover .big { font-size: 92px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: var(--violet); text-shadow: 0 0 34px rgba(150, 80, 255, 0.6); }
+      .agents { display: flex; gap: 12px; margin-top: 40px; }
+      .agents div { width: 118px; padding: 16px 0 14px; border-radius: 16px; background: var(--card); border: 1px solid rgba(166, 107, 255, 0.55); font-size: 14px; font-weight: 800; box-shadow: 0 6px 0 rgba(124, 44, 255, 0.35); }
+      .agents svg { width: 34px; height: 34px; display: block; margin: 0 auto 8px; }
+      .agents small { display: block; margin-top: 4px; font-size: 11px; color: #34d399; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecdfff" /><stop offset="1" stop-color="#9b5cff" /></linearGradient>
+        <symbol id="i-target" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="url(#ig)" stroke-width="4.5" /><circle cx="24" cy="24" r="11" fill="none" stroke="url(#ig)" stroke-width="4.5" /><circle cx="24" cy="24" r="4" fill="url(#ig)" /></symbol>
+        <symbol id="i-search" viewBox="0 0 48 48"><circle cx="20" cy="20" r="13" fill="none" stroke="url(#ig)" stroke-width="5" /><path d="M30 30l12 12" stroke="url(#ig)" stroke-width="6" stroke-linecap="round" /></symbol>
+        <symbol id="i-pen" viewBox="0 0 48 48"><path d="M10 38l4-12L32 8l8 8-18 18Z" fill="url(#ig)" /><path d="M8 42h32" stroke="url(#ig)" stroke-width="4" stroke-linecap="round" /></symbol>
+        <symbol id="i-film" viewBox="0 0 48 48"><rect x="5" y="14" width="38" height="28" rx="5" fill="url(#ig)" /><path d="M5 10l38-6" stroke="url(#ig)" stroke-width="5" stroke-linecap="round" /><path d="M20 22l10 6-10 6Z" fill="#1b0d33" /></symbol>
+        <symbol id="i-send" viewBox="0 0 48 48"><path d="M4 22L44 6 30 44l-7-15Z" fill="url(#ig)" /><path d="M23 29L44 6" stroke="#1b0d33" stroke-width="3" /></symbol>
+      </defs>
+    </svg>
+
+    <!-- 1. cover -->
+    <section class="page cover">
+      <img src="../assets/img/gx-logo-badge.png" alt="The GrowthX Studio" style="width: 150px; height: 150px; border-radius: 50%; margin-top: 90px; box-shadow: 0 0 50px rgba(139, 61, 255, 0.55)" />
+      <span class="kicker" style="margin-top: 44px">FREE SETUP GUIDE</span>
+      <div class="big" style="margin-top: 26px">GTM<br />COMMAND<br />CENTER</div>
+      <p class="lead" style="font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 26px">Apni poori marketing team Claude ke andar.<br /><span class="v">5 steps. 1 AI team. 4 jobs.</span></p>
+      <div class="agents">
+        <div><svg viewBox="0 0 48 48"><use href="#i-target" /></svg>Strategist<small>● live</small></div>
+        <div><svg viewBox="0 0 48 48"><use href="#i-search" /></svg>Spy<small>● live</small></div>
+        <div><svg viewBox="0 0 48 48"><use href="#i-pen" /></svg>Writer<small>● live</small></div>
+        <div><svg viewBox="0 0 48 48"><use href="#i-film" /></svg>Filmmaker<small>● live</small></div>
+        <div><svg viewBox="0 0 48 48"><use href="#i-send" /></svg>Publisher<small>● live</small></div>
+      </div>
+      <p style="position: absolute; bottom: 60px; left: 0; right: 0; font-size: 14px; font-weight: 800; letter-spacing: 0.3em; color: var(--muted)">@THEGROWTHXSTUDIO · BUILD • GROW • SCALE</p>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 2. overview -->
+    <section class="page tight">
+      <span class="kicker">OVERVIEW</span>
+      <h1>What you're <span class="v">building</span></h1>
+      <p class="lead">One Claude Project that works like a 5-person marketing team. You give direction, it does the heavy lifting, and nothing goes live without your OK.</p>
+      <h2>1 AI team, 4 jobs</h2>
+      <div class="grid2">
+        <div class="tile"><b>Brand strategy</b><span>Positioning, audience and brand voice, built from an interview about your business.</span></div>
+        <div class="tile"><b>SEO blogs</b><span>Ranked, on-brand articles researched from what already ranks.</span></div>
+        <div class="tile"><b>LinkedIn posts</b><span>A week of posts from every blog, queued and scheduled.</span></div>
+        <div class="tile"><b>Product videos</b><span>Product demos and UGC-style ads.</span></div>
+      </div>
+      <h2>The team</h2>
+      <table>
+        <tr><th>AGENT</th><th>RUNS ON</th><th>JOB</th></tr>
+        <tr><td>Strategist</td><td>Claude Project</td><td>Knows your business, customers and goals</td></tr>
+        <tr><td>Spy</td><td>Firecrawl MCP</td><td>Reads competitor websites and top-ranking content</td></tr>
+        <tr><td>Writer</td><td>Claude + your brand voice</td><td>SEO blogs and LinkedIn posts</td></tr>
+        <tr><td>Filmmaker</td><td>Higgsfield MCP + Remotion</td><td>UGC-style ads and product demo videos</td></tr>
+        <tr><td>Publisher</td><td>Typefully MCP</td><td>Schedules posts to LinkedIn (and X, Threads)</td></tr>
+      </table>
+      <h2>Before you start</h2>
+      <ul>
+        <li><b>A paid Claude plan</b>: custom connectors (MCP) need one.</li>
+        <li><b>Firecrawl</b> account with an API key.</li>
+        <li><b>Higgsfield</b> account (video generation uses Higgsfield credits).</li>
+        <li><b>Typefully</b> account with your LinkedIn connected.</li>
+        <li><b>For Remotion:</b> Node.js and Claude Code on your computer.</li>
+      </ul>
+      <div class="note"><b>Time needed:</b> about an hour for the first setup. After that, one weekly prompt runs the whole team.</div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>2 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 3. step 1 -->
+    <section class="page">
+      <span class="kicker">STEP 1 / 5 · STRATEGIST</span>
+      <div class="steps"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      <h1>Create the <span class="v">Claude Project</span></h1>
+      <p class="lead">Pehle Claude ko tumhara business samjhao. Everything else builds on this.</p>
+      <h2>Set it up</h2>
+      <ol>
+        <li>Open <b>claude.ai → Projects → + New project</b>. Name it <b>GTM Command Center</b>.</li>
+        <li>Paste the <b>project instructions</b> below into the project's instructions field.</li>
+        <li>Start a chat inside the project, send the <b>starter prompt</b>, and answer one question at a time.</li>
+        <li>Copy the final Business Brief into a document and add it to the project's <b>knowledge</b>, so every future chat starts with it.</li>
+      </ol>
+      <div class="prompt"><span class="tag">PROJECT INSTRUCTIONS</span>You are the in-house marketing team for [BRAND NAME]. You work as five specialists: Strategist, Spy, Writer, Filmmaker and Publisher. Always follow the Business Brief and Brand Voice saved in this project. Write in [LANGUAGE / TONE, e.g. simple Hinglish]. Never invent facts, prices or features. Always show me a draft and wait for my approval before you publish, schedule or generate paid media.</div>
+      <div class="prompt"><span class="tag">STARTER PROMPT</span>Interview me about my business, my customers and my competitors. Ask one question at a time. When you have enough, write a one-page Business Brief covering: what we sell, who buys it and why, our top 3 competitors, our positioning, and 3 growth goals for the next 90 days.</div>
+      <div class="note"><b>Tip:</b> if Claude's memory is turned on for your account, it will also remember details across chats. Saving the Brief to project knowledge works either way.</div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>3 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 4. step 2 -->
+    <section class="page">
+      <span class="kicker">STEP 2 / 5 · SPY</span>
+      <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+      <h1>Connect <span class="v">Firecrawl MCP</span></h1>
+      <p class="lead">Competitors analyse karo aur apni brand voice banao. Firecrawl lets Claude read any website.</p>
+      <h2>Connect it</h2>
+      <ol>
+        <li>Sign up at <b>firecrawl.dev</b> and copy your <b>API key</b> from the dashboard.</li>
+        <li>In Claude, open <b>Settings → Connectors → Add custom connector</b>.</li>
+        <li>Paste Firecrawl's hosted MCP URL from their docs (<b>docs.firecrawl.dev → MCP Server</b>). For claude.ai it currently looks like the line below, with your key in place of <b>YOUR_API_KEY</b>.</li>
+        <li>Open a chat in your project and switch Firecrawl on from the tools menu.</li>
+      </ol>
+      <div class="code">https://mcp.firecrawl.dev/YOUR_API_KEY/v2/mcp</div>
+      <div class="note"><b>Keep that URL private:</b> it contains your API key. Using Claude Desktop instead? Firecrawl's docs also cover a header-based setup and a local option (<b>npx -y firecrawl-mcp</b> with <b>FIRECRAWL_API_KEY</b> set).</div>
+      <div class="prompt"><span class="tag">PROMPT · COMPETITOR ANALYSIS</span>Use Firecrawl to read the homepage, pricing page and about page of [COMPETITOR A URL], [COMPETITOR B URL] and [COMPETITOR C URL]. For each one, tell me: what they sell, their price range, their main promise, who they target, any offers running now, and one gap we could own. End with a comparison table.</div>
+      <div class="prompt"><span class="tag">PROMPT · BRAND VOICE</span>Using our Business Brief and this competitor analysis, write our Brand Voice guide: 3 voice traits with do / don't examples, words we use, words we never use, and 5 sample lines. Keep it bold, simple and Hinglish-friendly.</div>
+      <div class="note"><b>Then:</b> save the Brand Voice guide to project knowledge, next to the Business Brief.</div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>4 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 5. step 3 -->
+    <section class="page">
+      <span class="kicker">STEP 3 / 5 · WRITER</span>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+      <h1>Generate <span class="v">SEO content</span></h1>
+      <p class="lead">The Writer is Claude itself, now armed with your Brief, your Brand Voice and Firecrawl research.</p>
+      <div class="prompt"><span class="tag">PROMPT · SEO BLOG</span>Act as the Writer. Use Firecrawl to search for "[TARGET KEYWORD]" and read the top-ranking articles. Then write a 1,200-word blog in our Brand Voice that covers everything they cover, plus one angle they miss. Include: an SEO title under 60 characters, a meta description under 155 characters, H2 / H3 structure, an FAQ section, and 3 internal link ideas.</div>
+      <div class="note"><b>Example topic:</b> "10 Meta Ads mistakes D2C brands make". Pick keywords your customers actually search, and fact-check any numbers before publishing.</div>
+      <div class="prompt"><span class="tag">PROMPT · A WEEK OF LINKEDIN POSTS</span>Turn this blog into 3 LinkedIn posts for this week: one story, one tips list, one contrarian take. Each under 1,300 characters, with a strong hook in the first line, a maximum of 3 hashtags, and a question at the end to drive comments.</div>
+      <h2>Make it better every week</h2>
+      <ul>
+        <li>Paste your best-performing post and ask: <b>"What made this work? Write 3 more like it."</b></li>
+        <li>Keep a "Swipe file" document in the project with hooks and posts you love.</li>
+        <li>Edit the drafts in your own words. AI drafts, you add the final 10%.</li>
+      </ul>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>5 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 6. step 4 -->
+    <section class="page">
+      <span class="kicker">STEP 4 / 5 · FILMMAKER</span>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+      <h1>Product videos with <span class="v">Higgsfield + Remotion</span></h1>
+      <h2>A · UGC-style ads with Higgsfield MCP</h2>
+      <ol>
+        <li>Create a Higgsfield account. Every video uses your Higgsfield credits.</li>
+        <li>In Claude: <b>Settings → Connectors → Add custom connector</b>, paste the Higgsfield MCP URL from <b>higgsfield.ai/mcp</b> (the official server runs at <b>mcp.higgsfield.ai</b>), then sign in.</li>
+      </ol>
+      <div class="prompt"><span class="tag">PROMPT · UGC AD</span>Write a 15-second UGC-style ad script for [PRODUCT] for Instagram Reels: a hook in the first 2 seconds, the problem, the product moment, and a clear CTA. Show me the script first. After I approve it, use Higgsfield to generate a vertical 9:16 video.</div>
+      <h2>B · Product demos with Remotion (in Claude Code)</h2>
+      <p>Remotion turns code into video, and its official skills teach Claude Code how to use it. Run these in your terminal:</p>
+      <div class="code">npx create-video@latest
+cd my-video
+npx skills add remotion-dev/skills
+claude</div>
+      <div class="prompt"><span class="tag">PROMPT · PRODUCT DEMO (IN CLAUDE CODE)</span>Using Remotion, make a 20-second 16:9 product demo for [PRODUCT] in 4 scenes: the problem, the product UI, 3 key features, and a CTA. Use our brand colours [HEX CODES]. Only use these features, don't invent any: [FEATURE LIST].</div>
+      <div class="note"><b>Preview</b> with <b>npm run dev</b> (Remotion Studio), then ask Claude Code to render the final MP4. Expect a round or two of fixes. Treat your first prompt as a brief, not a final render.</div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>6 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 7. step 5 -->
+    <section class="page">
+      <span class="kicker">STEP 5 / 5 · PUBLISHER</span>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <h1>Publish + <span class="v">Command Center</span></h1>
+      <h2>Connect Typefully</h2>
+      <ol>
+        <li>Create a Typefully account and connect your <b>LinkedIn</b> (X, Threads, Bluesky and Mastodon work too).</li>
+        <li>Add Typefully's official MCP server in <b>Claude → Settings → Connectors</b>. The URL and sign-in steps are in Typefully's Help Center, under <b>"Typefully MCP server"</b>.</li>
+      </ol>
+      <div class="prompt"><span class="tag">PROMPT · SCHEDULE</span>Schedule the 3 LinkedIn posts we approved in Typefully for Monday, Wednesday and Friday at 9:30 AM IST. Show me the full schedule before you save it.</div>
+      <h2>Your weekly Command Center</h2>
+      <table>
+        <tr><th>DAY</th><th>AGENT</th><th>OUTPUT</th></tr>
+        <tr><td>Monday</td><td>Strategist</td><td>This week's one focus and plan</td></tr>
+        <tr><td>Tuesday</td><td>Spy</td><td>What competitors changed or launched</td></tr>
+        <tr><td>Wednesday</td><td>Writer</td><td>1 SEO blog + 3 LinkedIn posts</td></tr>
+        <tr><td>Thursday</td><td>Filmmaker</td><td>1 UGC ad + 1 product demo</td></tr>
+        <tr><td>Friday</td><td>Publisher</td><td>Everything scheduled, results reviewed</td></tr>
+      </table>
+      <div class="prompt"><span class="tag">PROMPT · MONDAY KICKOFF</span>It's Monday. Run the GTM Command Center: 1) Spy: check what changed on our competitors' sites this week. 2) Strategist: pick this week's single focus. 3) Writer: draft 1 blog and 3 LinkedIn posts. 4) Filmmaker: write 1 ad script. 5) Publisher: propose a posting schedule. Wait for my approval before generating any video or scheduling any post.</div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>7 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+
+    <!-- 8. checklist -->
+    <section class="page">
+      <span class="kicker">CHECKLIST</span>
+      <h1>Setup <span class="v">checklist</span></h1>
+      <ul class="check" style="margin-top: 18px">
+        <li><span><b>Project created:</b> "GTM Command Center" with the instructions pasted in.</span></li>
+        <li><span><b>Business Brief</b> written and added to project knowledge.</span></li>
+        <li><span><b>Firecrawl connected</b> and the competitor analysis done.</span></li>
+        <li><span><b>Brand Voice guide</b> saved to project knowledge.</span></li>
+        <li><span><b>First SEO blog</b> and 3 LinkedIn posts drafted.</span></li>
+        <li><span><b>Higgsfield connected</b> and first UGC ad script approved.</span></li>
+        <li><span><b>Remotion</b> project created with skills installed.</span></li>
+        <li><span><b>Typefully connected</b> and first week of posts scheduled.</span></li>
+        <li><span><b>Monday kickoff</b> prompt saved for next week.</span></li>
+      </ul>
+      <h2>Pro tips</h2>
+      <ul>
+        <li><b>Human in the loop:</b> approve every post and video before it goes out.</li>
+        <li><b>Refresh monthly:</b> update the Business Brief when offers or goals change.</li>
+        <li><b>Watch credits:</b> video generation costs credits, so approve scripts first.</li>
+        <li><b>Protect keys:</b> never share connector URLs or API keys in public.</li>
+        <li><b>Menus move:</b> if a setting has moved, each tool's docs have the latest steps.</li>
+      </ul>
+      <div class="note" style="margin-top: 26px; text-align: center; padding: 22px">
+        <div style="font-size: 22px; font-weight: 900; color: var(--ink)">Aise hi practical marketing hacks ke liye</div>
+        <div style="font-size: 30px; font-weight: 900; color: var(--violet); margin-top: 6px">Follow @thegrowthxstudio</div>
+        <div style="font-size: 14px; margin-top: 8px">Questions? thegrowthxstudio@gmail.com</div>
+      </div>
+      <div class="foot"><span><img src="../assets/img/gx-logo-badge.png" alt="" />THE GROWTHX STUDIO</span><span>8 / 8</span></div>
+      <div class="stripe"></div>
+    </section>
+  </body>
+</html>
