@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Medium.otf"); font-weight: 500; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-SemiBold.otf"); font-weight: 600; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Bold.otf"); font-weight: 700; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-ExtraBold.otf"); font-weight: 800; }
+      @font-face { font-family: "InterHF"; src: url("assets/fonts/Inter-Black.otf"); font-weight: 900; }
+
+      :root {
+        --bg: #06040a;
+        --ink: #f5f0ff;
+        --soft: #d6cbef;
+        --muted: #9d8fc0;
+        --violet: #a66bff;
+        --violet-soft: #c9a6ff;
+        --hl: #8b3dff;
+        --glow: 0 0 34px rgba(150, 80, 255, 0.55), 0 0 10px rgba(150, 80, 255, 0.35);
+        --card: linear-gradient(180deg, rgba(30, 14, 56, 0.95), rgba(14, 8, 26, 0.95));
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      body { font-family: "InterHF", "Inter", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+      /* ---------- background + decor ---------- */
+      #bg { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+      #bg .glow { position: absolute; inset: 0; background: radial-gradient(ellipse 50% 55% at 50% 50%, rgba(96, 34, 170, 0.5) 0%, rgba(50, 16, 92, 0.28) 45%, rgba(6, 4, 10, 0) 75%); }
+      #bg .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px); background-size: 64px 64px; }
+      #rings { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      .dots { position: absolute; width: 300px; height: 220px; background-image: radial-gradient(rgba(201, 166, 255, 0.28) 2px, transparent 2.5px); background-size: 22px 22px; }
+      .stripes { position: absolute; left: 0; right: 0; bottom: 70px; height: 34px; opacity: 0.55; background: repeating-linear-gradient(-45deg, rgba(124, 44, 255, 0.55) 0 12px, transparent 12px 26px); }
+      .deco { position: absolute; }
+
+      /* ---------- chrome ---------- */
+      #brand { position: absolute; top: 36px; right: 52px; z-index: 50; display: flex; align-items: center; gap: 18px; height: 84px; padding: 0 28px 0 12px; border-radius: 42px; background: rgba(14, 8, 24, 0.85); border: 2px solid rgba(166, 107, 255, 0.35); }
+      #brand img { height: 56px; mix-blend-mode: screen; }
+      #brand span { font-weight: 800; font-size: 24px; letter-spacing: 0.16em; color: #fff; }
+      #brand span b { color: var(--violet); font-weight: 900; }
+      #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; background: rgba(255, 255, 255, 0.06); z-index: 50; }
+      #progress i { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, #6d28d9, #a855f7); box-shadow: 0 0 18px rgba(168, 85, 247, 0.8); }
+      #wipe { position: absolute; top: -60px; left: 0; width: 1500px; height: 1200px; z-index: 40; background: linear-gradient(90deg, #5b16d6 0%, #7c2cff 55%, #a35cff 86%, #efe4ff 100%); }
+
+      /* captions */
+      #caps { position: absolute; left: 0; right: 0; bottom: 120px; height: 90px; z-index: 30; }
+      .cap { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); max-width: 1500px; padding: 18px 36px; border-radius: 20px; text-align: center; font-size: 42px; font-weight: 800; line-height: 1.2; background: rgba(10, 6, 18, 0.88); border: 2px solid rgba(166, 107, 255, 0.35); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); white-space: nowrap; opacity: 0; }
+      .cap .cw { color: rgba(255, 255, 255, 0.32); }
+
+      /* ---------- shared type ---------- */
+      .scene { position: absolute; inset: 0; z-index: 10; }
+      .abs { position: absolute; }
+      .line { display: flex; align-items: baseline; white-space: nowrap; }
+      .line > * + * { margin-left: 0.26em; }
+      .center { justify-content: center; }
+      .sm { font-size: 60px; font-weight: 700; line-height: 1.15; }
+      .disp { font-weight: 900; letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
+      .v { color: var(--violet); text-shadow: var(--glow); }
+      .wht { color: var(--ink); }
+      .hl { background: var(--hl); color: #fff; padding: 0 0.16em; border-radius: 0.1em; box-shadow: 0 0 26px rgba(139, 61, 255, 0.6); }
+      .w, .big, .hl { display: inline-block; }
+      .ch { display: none; }
+      .muted { color: var(--muted); }
+
+      .pill { display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px; border-radius: 16px; font-size: 30px; font-weight: 900; color: #fff; background: rgba(139, 61, 255, 0.2); border: 2px solid rgba(166, 107, 255, 0.7); white-space: nowrap; }
+      .pill b { color: var(--violet-soft); }
+      .tagpill { padding: 10px 20px; border-radius: 12px; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; background: var(--hl); box-shadow: 0 0 26px rgba(139, 61, 255, 0.55); }
+
+      .agent { width: 200px; height: 150px; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; font-size: 26px; font-weight: 800; background: var(--card); border: 2px solid rgba(166, 107, 255, 0.5); box-shadow: 0 0 30px rgba(139, 61, 255, 0.25); }
+      .agent svg { width: 54px; height: 54px; }
+      .agent small { font-size: 18px; font-weight: 700; color: #34d399; letter-spacing: 0.04em; }
+
+      .job { position: absolute; left: 1000px; width: 800px; height: 128px; display: flex; align-items: center; gap: 28px; padding: 0 30px; border-radius: 22px; background: var(--card); border: 2px solid rgba(255, 255, 255, 0.1); }
+      .job .ring { position: absolute; inset: -2px; border-radius: 22px; border: 3px solid var(--violet); background: rgba(139, 61, 255, 0.12); box-shadow: 0 0 36px rgba(139, 61, 255, 0.55); }
+      .job .ic { position: relative; width: 78px; height: 78px; border-radius: 18px; display: grid; place-items: center; background: rgba(139, 61, 255, 0.22); }
+      .job .ic svg { width: 46px; height: 46px; }
+      .job h3 { position: relative; font-size: 44px; font-weight: 800; letter-spacing: -0.01em; }
+      .job p { position: relative; font-size: 24px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+
+      /* step layout */
+      .stepdots { display: flex; gap: 16px; }
+      .stepdots i { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 22px; font-weight: 800; color: var(--muted); border: 2px solid rgba(166, 107, 255, 0.35); }
+      .stepdots i.done { background: rgba(139, 61, 255, 0.35); color: #fff; border-color: transparent; }
+      .stepdots i.now { background: var(--hl); color: #fff; border-color: transparent; box-shadow: 0 0 22px rgba(139, 61, 255, 0.8); }
+
+      .win { position: absolute; left: 900px; top: 170px; width: 900px; height: 640px; border-radius: 26px; overflow: hidden; background: var(--card); border: 2px solid rgba(166, 107, 255, 0.5); box-shadow: 0 14px 0 rgba(124, 44, 255, 0.3), 0 0 60px rgba(139, 61, 255, 0.3); }
+      .win .bar { height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 22px; font-weight: 700; color: var(--muted); }
+      .win .bar i { width: 14px; height: 14px; border-radius: 50%; }
+      .win .body { position: relative; padding: 30px 34px; }
+      .lab { font-size: 20px; font-weight: 800; letter-spacing: 0.14em; color: var(--muted); }
+      .field { margin-top: 10px; min-height: 66px; border-radius: 14px; padding: 16px 22px; font-size: 30px; font-weight: 700; background: rgba(0, 0, 0, 0.38); border: 2px solid rgba(255, 255, 255, 0.12); }
+      .caret { display: inline-block; width: 3px; height: 34px; margin-left: 3px; vertical-align: -6px; background: var(--violet); }
+      .btn { display: inline-block; padding: 14px 26px; border-radius: 14px; font-size: 26px; font-weight: 800; background: rgba(139, 61, 255, 0.18); border: 2px solid rgba(166, 107, 255, 0.6); color: var(--violet-soft); position: relative; }
+      .btn .on { position: absolute; inset: -2px; border-radius: 14px; background: var(--hl); box-shadow: 0 0 22px rgba(139, 61, 255, 0.7); }
+      .btn span { position: relative; }
+      .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 30px; font-size: 24px; font-weight: 800; color: #fff; background: var(--hl); box-shadow: 0 0 22px rgba(139, 61, 255, 0.55); }
+      .chip.ghost { background: rgba(139, 61, 255, 0.2); color: var(--violet-soft); box-shadow: none; border: 1px solid rgba(166, 107, 255, 0.4); }
+      .cursor { position: absolute; width: 40px; height: 48px; z-index: 5; }
+      .clickfx { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 3px solid var(--violet-soft); opacity: 0; z-index: 4; }
+
+      .conn { display: flex; align-items: center; justify-content: space-between; height: 84px; padding: 0 24px; border-radius: 16px; font-size: 30px; font-weight: 800; background: rgba(255, 255, 255, 0.04); border: 2px solid rgba(255, 255, 255, 0.1); }
+      .toggle { position: relative; width: 76px; height: 42px; border-radius: 21px; background: rgba(255, 255, 255, 0.18); }
+      .toggle .tr { position: absolute; inset: 0; border-radius: 21px; background: var(--hl); box-shadow: 0 0 16px rgba(139, 61, 255, 0.8); opacity: 0; }
+      .toggle .kn { position: absolute; top: 5px; left: 5px; width: 32px; height: 32px; border-radius: 50%; background: #fff; }
+      .comp { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; height: 70px; padding: 0 22px; border-radius: 14px; font-size: 26px; font-weight: 800; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); }
+      .comp small { font-size: 20px; font-weight: 600; color: var(--muted); }
+      .comp .scan { position: absolute; left: 0; bottom: 0; height: 4px; width: 100%; transform-origin: 0 50%; background: linear-gradient(90deg, #7c2cff, #c9a6ff); }
+      .tline { height: 16px; border-radius: 8px; background: rgba(255, 255, 255, 0.12); transform-origin: 0 50%; margin-top: 18px; }
+      .q { display: flex; align-items: center; gap: 22px; height: 78px; padding: 0 24px; border-radius: 16px; font-size: 30px; font-weight: 800; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 14px; }
+      .q em { font-style: normal; width: 70px; color: var(--violet-soft); }
+      .q b { margin-left: auto; font-size: 24px; color: #34d399; }
+
+      .cbox { display: flex; align-items: center; gap: 22px; width: 960px; height: 104px; padding: 0 16px 0 18px; border-radius: 52px; background: rgba(20, 10, 36, 0.95); border: 2px solid rgba(166, 107, 255, 0.55); box-shadow: 0 10px 0 rgba(124, 44, 255, 0.35), 0 0 40px rgba(139, 61, 255, 0.35); }
+      .cbox img { width: 70px; height: 70px; border-radius: 50%; }
+      .cbox .txt { position: relative; flex: 1; font-size: 44px; font-weight: 800; white-space: nowrap; }
+      .cbox .ph { position: absolute; left: 0; top: 4px; color: rgba(255, 255, 255, 0.38); font-weight: 600; font-size: 34px; }
+      .cbox .post { position: relative; padding: 18px 34px; border-radius: 34px; font-size: 32px; font-weight: 800; color: var(--violet-soft); background: rgba(139, 61, 255, 0.18); }
+      .cbox .post i { position: absolute; inset: 0; border-radius: 34px; background: var(--hl); box-shadow: 0 0 22px rgba(139, 61, 255, 0.8); }
+      .cbox .post span { position: relative; }
+
+      #s10 .logo { width: 560px; height: 560px; border-radius: 50%; box-shadow: 0 0 90px rgba(139, 61, 255, 0.55); }
+      #s10 .logo img { width: 560px; height: 560px; }
+      #s10 .ctapill { display: inline-flex; align-items: center; gap: 22px; padding: 26px 56px; border-radius: 70px; background: linear-gradient(90deg, #8b3dff, #a66bff); font-size: 66px; font-weight: 900; box-shadow: 0 0 50px rgba(139, 61, 255, 0.6); }
+      #s10 .ctapill svg { width: 66px; height: 66px; }
+      #s10 .mail { display: inline-flex; align-items: center; gap: 18px; padding: 20px 40px; border-radius: 18px; background: rgba(255, 255, 255, 0.04); border: 2px solid rgba(255, 255, 255, 0.14); font-size: 46px; font-weight: 700; }
+      #s10 .mail svg { width: 44px; height: 44px; }
+      #s10 .tagline { font-size: 40px; font-weight: 800; letter-spacing: 0.42em; }
+      #s10 .tagline b { color: var(--violet); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="46.5" data-width="1920" data-height="1080">
+      <!-- ===== background + decor ===== -->
+      <div id="bg">
+        <div class="glow"></div>
+        <div class="grid"></div>
+        <svg id="rings" viewBox="0 0 1920 1080">
+          <defs><linearGradient id="arcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9c2ff" /><stop offset="1" stop-color="#8b3dff" stop-opacity="0" /></linearGradient></defs>
+          <circle cx="960" cy="540" r="650" fill="none" stroke="rgba(166,107,255,0.2)" stroke-width="2" />
+          <circle cx="960" cy="540" r="490" fill="none" stroke="rgba(166,107,255,0.14)" stroke-width="2" />
+          <g id="arcOuter"><circle cx="960" cy="540" r="650" fill="none" stroke="url(#arcg)" stroke-width="3" stroke-dasharray="1100 3000" stroke-linecap="round" /></g>
+          <g id="arcInner"><circle cx="960" cy="540" r="490" fill="none" stroke="url(#arcg)" stroke-width="2.5" stroke-dasharray="700 2400" stroke-linecap="round" /></g>
+        </svg>
+        <div class="dots" style="left: 1560px; top: 150px"></div>
+        <div class="dots" style="left: 60px; top: 640px; width: 240px; height: 180px"></div>
+        <div class="stripes"></div>
+        <svg class="deco float" data-amp="14" style="left: 70px; top: 140px; width: 64px; height: 64px" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="rgba(166,107,255,0.6)" stroke-width="4" /></svg>
+        <svg class="deco float" data-amp="18" style="left: 210px; top: 860px; width: 70px; height: 62px" viewBox="0 0 70 62"><path d="M35 4L66 58H4Z" fill="rgba(124,44,255,0.55)" /></svg>
+        <svg class="deco float spin" data-amp="12" style="left: 1780px; top: 520px; width: 56px; height: 56px" viewBox="0 0 56 56"><rect x="8" y="8" width="40" height="40" rx="6" fill="none" stroke="rgba(166,107,255,0.6)" stroke-width="4" /></svg>
+        <svg class="deco float" data-amp="10" style="left: 1660px; top: 900px; width: 46px; height: 46px" viewBox="0 0 46 46"><path d="M23 4v38M4 23h38" stroke="rgba(166,107,255,0.6)" stroke-width="7" stroke-linecap="round" /></svg>
+        <svg class="deco float" data-amp="16" style="left: 1240px; top: 960px; width: 34px; height: 34px" viewBox="0 0 34 34"><circle cx="17" cy="17" r="15" fill="rgba(124,44,255,0.7)" /></svg>
+      </div>
+
+      <!-- ===== S1 hook ===== -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="3.55" data-track-index="1">
+        <div class="abs tagpill pop" style="left: 60px; top: 50px" data-t="0.05" data-sfx="pop">AI MARKETING TEAM</div>
+        <div class="abs" style="left: 0; right: 0; top: 170px">
+          <div class="line center" style="align-items: center">
+            <span class="w sm" data-t="0">Ab</span><span class="w sm" data-t="0.2">tum</span><span class="w sm" data-t="0.38">apni</span>
+            <span class="big disp wht" data-t="0.81" data-sfx="pop" style="font-size: 104px">POORI</span>
+          </div>
+          <div class="line center" style="margin-top: 8px">
+            <span class="big disp v" data-t="1.11" data-sfx="pop" style="font-size: 170px">MARKETING</span><span class="big disp v" data-t="1.56" style="font-size: 170px">TEAM</span>
+          </div>
+          <div class="line center" style="align-items: center; margin-top: 18px">
+            <span class="hl disp" data-t="1.71" data-sfx="pop" style="font-size: 92px">CLAUDE</span>
+            <span class="w sm" data-t="2.01">ke</span><span class="w sm" data-t="2.16">andar</span><span class="w sm" data-t="2.46">chala</span><span class="w sm" data-t="2.76">sakte</span><span class="w sm" data-t="3.06">ho!</span>
+          </div>
+        </div>
+        <div class="abs" style="left: 0; right: 0; top: 650px; display: flex; justify-content: center; gap: 22px">
+          <div class="agent pop" data-t="2.1" data-sfx="tick"><svg viewBox="0 0 48 48"><use href="#i-target" /></svg>Strategist</div>
+          <div class="agent pop" data-t="2.25" data-sfx="tick"><svg viewBox="0 0 48 48"><use href="#i-search" /></svg>Spy</div>
+          <div class="agent pop" data-t="2.4" data-sfx="tick"><svg viewBox="0 0 48 48"><use href="#i-pen" /></svg>Writer</div>
+          <div class="agent pop" data-t="2.55" data-sfx="tick"><svg viewBox="0 0 48 48"><use href="#i-film" /></svg>Filmmaker</div>
+          <div class="agent pop" data-t="2.7" data-sfx="tick"><svg viewBox="0 0 48 48"><use href="#i-send" /></svg>Publisher</div>
+        </div>
+      </div>
+
+      <!-- ===== S2 1 AI team, 4 jobs ===== -->
+      <div id="s2" class="clip scene" data-start="3.55" data-duration="9.4" data-track-index="1">
+        <div class="abs" style="left: 140px; top: 300px">
+          <div class="line" style="font-size: 64px; font-weight: 800; letter-spacing: 0.14em; color: var(--soft)"><span class="w" data-t="3.67">1</span><span class="w" data-t="3.85">AI</span><span class="w" data-t="4.2">TEAM.</span></div>
+          <div class="line" style="margin-top: 10px"><span class="big disp v" data-t="4.84" data-sfx="impact" style="font-size: 196px">4</span><span class="big disp v" data-t="5.1" style="font-size: 196px">JOBS.</span></div>
+        </div>
+        <div class="job rise" style="top: 190px" data-t="5.98" data-sfx="pop" data-active="5.98-7.9"><span class="ring"></span><span class="ic"><svg viewBox="0 0 48 48"><use href="#i-target" /></svg></span><div><h3>Brand strategy</h3><p>positioning · audience · voice</p></div></div>
+        <div class="job rise" style="top: 342px" data-t="7.9" data-sfx="pop" data-active="7.9-9.44"><span class="ring"></span><span class="ic"><svg viewBox="0 0 48 48"><use href="#i-pen" /></svg></span><div><h3>SEO blogs</h3><p>ranked, on-brand articles</p></div></div>
+        <div class="job rise" style="top: 494px" data-t="9.44" data-sfx="pop" data-active="9.44-10.88"><span class="ring"></span><span class="ic"><svg viewBox="0 0 48 48"><use href="#i-in" /></svg></span><div><h3>LinkedIn posts</h3><p>a week of posts, queued</p></div></div>
+        <div class="job rise" style="top: 646px" data-t="10.88" data-sfx="pop" data-active="10.88-12.95"><span class="ring"></span><span class="ic"><svg viewBox="0 0 48 48"><use href="#i-film" /></svg></span><div><h3>Product videos</h3><p>demo + UGC-style ads</p></div></div>
+      </div>
+
+      <!-- ===== S3 setup ===== -->
+      <div id="s3" class="clip scene" data-start="12.95" data-duration="1.25" data-track-index="1">
+        <div class="abs" style="left: 0; right: 0; top: 330px; text-align: center"><span class="big disp wht" data-t="13.3" data-sfx="impact" style="font-size: 260px">Setup</span></div>
+        <div class="abs stepdots" style="left: 0; right: 0; top: 650px; justify-content: center; gap: 26px">
+          <i class="pop now" data-t="13.5" data-sfx="tick" style="width: 70px; height: 70px; font-size: 30px">1</i><i class="pop" data-t="13.58" style="width: 70px; height: 70px; font-size: 30px">2</i><i class="pop" data-t="13.66" style="width: 70px; height: 70px; font-size: 30px">3</i><i class="pop" data-t="13.74" style="width: 70px; height: 70px; font-size: 30px">4</i><i class="pop" data-t="13.82" style="width: 70px; height: 70px; font-size: 30px">5</i>
+        </div>
+      </div>
+
+      <!-- ===== S4 step 1 ===== -->
+      <div id="s4" class="clip scene" data-start="14.2" data-duration="6.0" data-track-index="1">
+        <div class="abs" style="left: 120px; top: 250px">
+          <span class="pill pop" data-t="14.3" data-sfx="pop"><b>STEP 1/5</b></span>
+          <div class="disp v wipe" data-t="14.42" style="font-size: 120px; margin-top: 36px">Claude</div>
+          <div class="disp wht wipe" data-t="14.55" style="font-size: 120px; margin-top: 6px">Project</div>
+          <div class="sm muted fade" data-t="14.7" style="font-size: 38px; margin-top: 22px">Business samjhao</div>
+          <div class="stepdots fade" data-t="14.8" style="margin-top: 46px"><i class="now">1</i><i>2</i><i>3</i><i>4</i><i>5</i></div>
+        </div>
+        <div class="win rise" data-t="14.35" data-sfx="swoosh">
+          <div class="bar"><i style="background: #f0607a"></i><i style="background: #f5c04a"></i><i style="background: #34d399"></i>&nbsp;Claude · Projects</div>
+          <div class="body">
+            <div class="btn"><span class="on fade" data-t="15.0"></span><span>+ New project</span></div>
+            <div class="fade" data-t="15.1" style="margin-top: 30px"><div class="lab">PROJECT NAME</div><div class="field"><span data-type="15.2" data-dur="0.9" data-sfx="type">GTM Command Center</span><span class="caret blink" data-from="15.1" data-to="16.5"></span></div></div>
+            <div class="fade" data-t="16.6" style="margin-top: 24px"><div class="lab">STARTER PROMPT</div><div class="field" style="font-size: 26px; font-weight: 600; line-height: 1.4; height: 170px; white-space: normal"><span data-type="16.7" data-dur="1.9" data-sfx="type">“Interview me about my business, my customers and my competitors. Ask one question at a time, then save everything to memory.”</span></div></div>
+            <div class="pop" data-t="19.0" data-sfx="ding" style="margin-top: 22px"><span class="chip">✓ Claude ab tumhara business jaanta hai</span></div>
+          </div>
+          <svg class="cursor" data-path="700,560 150,95" data-move="14.5-15.0" data-click="15.0" viewBox="0 0 40 48"><use href="#i-cursor" /></svg>
+        </div>
+      </div>
+
+      <!-- ===== S5 step 2 ===== -->
+      <div id="s5" class="clip scene" data-start="20.2" data-duration="5.8" data-track-index="1">
+        <div class="abs" style="left: 120px; top: 250px">
+          <span class="pill pop" data-t="20.3" data-sfx="pop"><b>STEP 2/5</b></span>
+          <div class="disp v wipe" data-t="20.42" style="font-size: 120px; margin-top: 36px">Firecrawl</div>
+          <div class="disp wht wipe" data-t="20.55" style="font-size: 120px; margin-top: 6px">MCP</div>
+          <div class="sm muted fade" data-t="20.7" style="font-size: 38px; margin-top: 22px">Competitors + brand voice</div>
+          <div class="stepdots fade" data-t="20.8" style="margin-top: 46px"><i class="done">1</i><i class="now">2</i><i>3</i><i>4</i><i>5</i></div>
+        </div>
+        <div class="win rise" data-t="20.35" data-sfx="swoosh">
+          <div class="bar"><i style="background: #f0607a"></i><i style="background: #f5c04a"></i><i style="background: #34d399"></i>&nbsp;Settings · Connectors</div>
+          <div class="body">
+            <div class="conn" id="fireRow"><span>🔥 Firecrawl MCP</span><span class="toggle"><i class="tr fade" data-t="21.6"></i><i class="kn" id="fireKnob"></i></span></div>
+            <div class="conn" style="margin-top: 14px; opacity: 0.45"><span>Notion MCP</span><span class="toggle"><i class="kn"></i></span></div>
+            <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px">
+              <div class="comp rise" data-t="22.8" data-sfx="pop"><span>Competitor A</span><small>pricing · offers · ads</small><i class="scan grow" data-t="22.85" data-dur="0.6"></i></div>
+              <div class="comp rise" data-t="23.3" data-sfx="pop"><span>Competitor B</span><small>positioning · gaps</small><i class="scan grow" data-t="23.35" data-dur="0.6"></i></div>
+              <div class="comp rise" data-t="23.8" data-sfx="pop"><span>Competitor C</span><small>content · SEO</small><i class="scan grow" data-t="23.85" data-dur="0.6"></i></div>
+            </div>
+            <div class="pop" data-t="24.8" data-sfx="ding" style="margin-top: 22px"><span class="chip">🎙 Brand voice: bold · simple · Hinglish</span></div>
+          </div>
+          <svg class="cursor" data-path="560,520 790,95" data-move="20.9-21.55" data-click="21.6" viewBox="0 0 40 48"><use href="#i-cursor" /></svg>
+        </div>
+      </div>
+
+      <!-- ===== S6 step 3 ===== -->
+      <div id="s6" class="clip scene" data-start="26.0" data-duration="3.5" data-track-index="1">
+        <div class="abs" style="left: 120px; top: 250px">
+          <span class="pill pop" data-t="26.1" data-sfx="pop"><b>STEP 3/5</b></span>
+          <div class="disp v wipe" data-t="26.22" style="font-size: 120px; margin-top: 36px">The</div>
+          <div class="disp wht wipe" data-t="26.35" style="font-size: 120px; margin-top: 6px">Writer</div>
+          <div class="sm muted fade" data-t="26.5" style="font-size: 38px; margin-top: 22px">SEO content</div>
+          <div class="stepdots fade" data-t="26.6" style="margin-top: 46px"><i class="done">1</i><i class="done">2</i><i class="now">3</i><i>4</i><i>5</i></div>
+        </div>
+        <div class="win rise" data-t="26.15" data-sfx="swoosh">
+          <div class="bar"><i style="background: #f0607a"></i><i style="background: #f5c04a"></i><i style="background: #34d399"></i>&nbsp;Writer · SEO blog</div>
+          <div class="body">
+            <div class="lab">BLOG TITLE</div>
+            <div style="margin-top: 14px; font-size: 46px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.15; min-height: 110px"><span data-type="27.1" data-dur="0.9" data-sfx="type">10 Meta Ads mistakes D2C brands make</span></div>
+            <div class="tline grow" data-t="28.0" data-dur="0.3" style="width: 100%"></div>
+            <div class="tline grow" data-t="28.15" data-dur="0.3" style="width: 94%"></div>
+            <div class="tline grow" data-t="28.3" data-dur="0.3" style="width: 98%"></div>
+            <div class="tline grow" data-t="28.45" data-dur="0.3" style="width: 72%"></div>
+            <div class="tline grow" data-t="28.6" data-dur="0.3" style="width: 88%"></div>
+            <div style="margin-top: 30px; display: flex; gap: 12px">
+              <span class="chip pop" data-t="28.9" data-sfx="pop">🔑 Keywords ✓</span><span class="chip ghost pop" data-t="29.05">SEO score 92</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S7 step 4 ===== -->
+      <div id="s7" class="clip scene" data-start="29.5" data-duration="3.9" data-track-index="1">
+        <div class="abs" style="left: 120px; top: 250px">
+          <span class="pill pop" data-t="29.6" data-sfx="pop"><b>STEP 4/5</b></span>
+          <div class="disp v wipe" data-t="29.72" style="font-size: 110px; margin-top: 36px">Higgsfield</div>
+          <div class="disp wht wipe" data-t="29.85" style="font-size: 110px; margin-top: 6px">+ Remotion</div>
+          <div class="sm muted fade" data-t="30.0" style="font-size: 38px; margin-top: 22px">Product videos</div>
+          <div class="stepdots fade" data-t="30.1" style="margin-top: 46px"><i class="done">1</i><i class="done">2</i><i class="done">3</i><i class="now">4</i><i>5</i></div>
+        </div>
+        <div class="win rise" data-t="29.65" data-sfx="swoosh">
+          <div class="bar"><i style="background: #f0607a"></i><i style="background: #f5c04a"></i><i style="background: #34d399"></i>&nbsp;Product video</div>
+          <div class="body">
+            <div style="position: relative; height: 300px; border-radius: 18px; overflow: hidden; background: linear-gradient(135deg, #3b0f8a, #8b3dff 55%, #c9a6ff)">
+              <div class="pop" data-t="30.0" data-sfx="pop" style="position: absolute; left: 50%; top: 50%; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; background: #fff; display: grid; place-items: center"><svg viewBox="0 0 40 40" style="width: 44px; height: 44px; margin-left: 6px"><path d="M8 4l28 16L8 36Z" fill="#7c2cff" /></svg></div>
+              <div style="position: absolute; left: 24px; right: 24px; bottom: 20px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.3)"><i class="grow" data-t="30.2" data-dur="2.8" style="display: block; height: 100%; border-radius: 4px; background: #fff; transform-origin: 0 50%"></i></div>
+            </div>
+            <div style="display: flex; gap: 14px; margin-top: 16px">
+              <div class="pop" data-t="30.8" data-sfx="tick" style="flex: 1; height: 96px; border-radius: 12px; background: linear-gradient(135deg, #2a0f55, #6d28d9)"></div>
+              <div class="pop" data-t="31.0" style="flex: 1; height: 96px; border-radius: 12px; background: linear-gradient(135deg, #35106a, #8b3dff)"></div>
+              <div class="pop" data-t="31.2" style="flex: 1; height: 96px; border-radius: 12px; background: linear-gradient(135deg, #2a0f55, #a66bff)"></div>
+              <div class="pop" data-t="31.4" style="flex: 1; height: 96px; border-radius: 12px; background: linear-gradient(135deg, #3b0f8a, #c9a6ff)"></div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px">
+              <span class="chip pop" data-t="31.6" data-sfx="pop">🎬 Remotion demo</span><span class="chip pop" data-t="32.3" data-sfx="pop">📱 UGC-style ad</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S8 step 5 ===== -->
+      <div id="s8" class="clip scene" data-start="33.4" data-duration="6.05" data-track-index="1">
+        <div class="abs" style="left: 120px; top: 250px">
+          <span class="pill pop" data-t="33.5" data-sfx="pop"><b>STEP 5/5</b></span>
+          <div class="disp v wipe" data-t="33.62" style="font-size: 104px; margin-top: 36px">Publish +</div>
+          <div class="disp wht wipe" data-t="33.75" style="font-size: 82px; margin-top: 10px">Command Center</div>
+          <div class="sm muted fade" data-t="33.9" style="font-size: 38px; margin-top: 22px">Typefully se publish</div>
+          <div class="stepdots fade" data-t="34.0" style="margin-top: 46px"><i class="done">1</i><i class="done">2</i><i class="done">3</i><i class="done">4</i><i class="now">5</i></div>
+        </div>
+        <div class="win rise" data-t="33.55" data-sfx="swoosh">
+          <div class="bar"><i style="background: #f0607a"></i><i style="background: #f5c04a"></i><i style="background: #34d399"></i>&nbsp;<span id="winLabelA">Typefully · Queue</span></div>
+          <div class="body" id="queue">
+            <div class="q rise" data-t="34.6" data-sfx="pop"><em>Mon</em>LinkedIn post 1<b class="fade" data-t="34.85">Scheduled ✓</b></div>
+            <div class="q rise" data-t="35.0" data-sfx="pop"><em>Wed</em>LinkedIn post 2<b class="fade" data-t="35.25">Scheduled ✓</b></div>
+            <div class="q rise" data-t="35.4" data-sfx="pop"><em>Fri</em>LinkedIn post 3<b class="fade" data-t="35.65" data-sfx="ding">Scheduled ✓</b></div>
+          </div>
+          <div class="body" id="command" style="position: absolute; left: 0; right: 0; top: 60px">
+            <div class="fade" data-t="36.5" data-sfx="swoosh" style="font-size: 40px; font-weight: 900; letter-spacing: 0.04em; color: var(--violet); text-shadow: var(--glow)">GTM COMMAND CENTER</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px">
+              <div class="agent pop" data-t="36.8" data-sfx="tick" style="width: auto; height: 160px"><svg viewBox="0 0 48 48"><use href="#i-target" /></svg>Strategist<small>● live</small></div>
+              <div class="agent pop" data-t="37.0" data-sfx="tick" style="width: auto; height: 160px"><svg viewBox="0 0 48 48"><use href="#i-search" /></svg>Spy<small>● live</small></div>
+              <div class="agent pop" data-t="37.2" data-sfx="tick" style="width: auto; height: 160px"><svg viewBox="0 0 48 48"><use href="#i-pen" /></svg>Writer<small>● live</small></div>
+              <div class="agent pop" data-t="37.4" data-sfx="tick" style="width: auto; height: 160px"><svg viewBox="0 0 48 48"><use href="#i-film" /></svg>Filmmaker<small>● live</small></div>
+              <div class="agent pop" data-t="37.6" data-sfx="tick" style="width: auto; height: 160px"><svg viewBox="0 0 48 48"><use href="#i-send" /></svg>Publisher<small>● live</small></div>
+              <div class="pop" data-t="38.6" data-sfx="ding" style="height: 160px; border-radius: 22px; display: grid; place-items: center; font-size: 26px; font-weight: 900; background: var(--hl); box-shadow: 0 0 30px rgba(139, 61, 255, 0.7)">ALL LIVE ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S9 CTA ===== -->
+      <div id="s9" class="clip scene" data-start="39.45" data-duration="3.85" data-track-index="1">
+        <div class="abs" style="left: 0; right: 0; top: 150px">
+          <div class="line center"><span class="w disp" data-t="39.72" style="font-size: 96px">Comment</span><span class="w disp" data-t="40.0" style="font-size: 96px">karo</span></div>
+          <div class="line center" style="margin-top: 6px"><span class="big disp v" data-t="40.2" data-sfx="impact" style="font-size: 270px">“GTM”</span></div>
+        </div>
+        <div class="abs" style="left: 0; right: 0; top: 650px; display: flex; justify-content: center">
+          <div class="cbox rise" data-t="40.3" data-sfx="pop">
+            <img src="assets/img/gx-logo-badge.png" alt="" />
+            <span class="txt"><span class="ph" data-hide="40.45">Add a comment…</span><span data-type="40.45" data-dur="0.3" data-sfx="type">GTM</span><span class="caret blink" data-from="40.3" data-to="43.3"></span></span>
+            <span class="post"><i class="fade" data-t="40.9" data-sfx="click"></i><span>Post</span></span>
+          </div>
+        </div>
+        <div class="abs" style="left: 0; right: 0; top: 820px">
+          <div class="line center" style="font-size: 54px; font-weight: 800">
+            <span class="w" data-t="41.05">aur</span><span class="w" data-t="41.25">poora</span><span class="w v" data-t="41.5">setup</span><span class="w v" data-t="41.8">guide</span><span class="w" data-t="42.1">main</span><span class="w" data-t="42.3">tumhe</span><span class="hl" data-t="42.6" data-sfx="pop">DM</span><span class="w" data-t="42.85">kar</span><span class="w" data-t="43.0">dunga</span><span class="w" data-t="43.1">📩</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S10 end card ===== -->
+      <div id="s10" class="clip scene" data-start="43.3" data-duration="3.2" data-track-index="1" style="display: flex; align-items: center; justify-content: center; gap: 90px">
+        <div class="logo pop" data-t="43.45" data-sfx="shimmer"><img src="assets/img/gx-logo-badge.png" alt="The GrowthX Studio" /></div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 34px">
+          <div class="rise" data-t="43.8" data-sfx="pop"><span class="ctapill">COMMENT “GTM” <svg viewBox="0 0 64 64"><use href="#i-chat" /></svg></span></div>
+          <div class="rise" data-t="44.1" data-sfx="tick"><span class="mail"><svg viewBox="0 0 64 64"><use href="#i-mail" /></svg>thegrowthxstudio@gmail.com</span></div>
+          <div class="tagline fade" data-t="44.4">BUILD <b>•</b> GROW <b>•</b> SCALE</div>
+        </div>
+      </div>
+
+      <!-- ===== captions (karaoke: words light up as spoken) ===== -->
+      <div id="caps">
+        <div class="cap" data-s="5.98" data-e="7.85" data-parts="5.98-7.62">Yeh tumhari brand strategy banayega,</div>
+        <div class="cap" data-s="7.85" data-e="9.4" data-parts="7.9-9.3">SEO blogs likhega,</div>
+        <div class="cap" data-s="9.4" data-e="10.85" data-parts="9.44-10.67">LinkedIn posts banayega,</div>
+        <div class="cap" data-s="10.85" data-e="12.9" data-parts="10.88-12.61">aur product videos bhi generate karega.</div>
+        <div class="cap" data-s="14.3" data-e="16.58" data-parts="14.37-14.77|14.96-16.49">Pehle,|ek naya Claude project banao</div>
+        <div class="cap" data-s="16.58" data-e="20.15" data-parts="16.63-17.93|18.21-19.87">aur starter prompt use karo,|taaki Claude tumhara business samjhe.</div>
+        <div class="cap" data-s="20.38" data-e="22.7" data-parts="20.44-22.46">Phir Firecrawl MCP connect karo,</div>
+        <div class="cap" data-s="22.7" data-e="25.95" data-parts="22.75-25.7">competitors analyse karne aur apni brand voice banane ke liye.</div>
+        <div class="cap" data-s="26.12" data-e="29.45" data-parts="26.2-26.77|27.07-29.28">Uske baad,|Writer se SEO content generate karo.</div>
+        <div class="cap" data-s="29.62" data-e="33.35" data-parts="29.72-33.18">Phir Higgsfield MCP aur Remotion se product videos banao.</div>
+        <div class="cap" data-s="33.5" data-e="36.32" data-parts="33.55-34.21|34.57-36.13">Aur last mein,|Typefully se sab publish karo,</div>
+        <div class="cap" data-s="36.32" data-e="39.4" data-parts="36.37-39.21">aur sab kuch ek GTM Command Center se manage karo.</div>
+      </div>
+
+      <!-- ===== chrome ===== -->
+      <div id="wipe"></div>
+      <div id="brand" class="clip" data-start="0" data-duration="43.3" data-track-index="5"><img src="assets/img/gx-mark.png" alt="" /><span>THE GROWTH<b>X</b> STUDIO</span></div>
+      <div id="progress"><i></i></div>
+
+      <!-- ===== audio: voiceover, music bed, pre-mixed SFX (tools/build_audio.py reads cues from this file) ===== -->
+      <audio id="vo" src="assets/audio/vo.m4a" data-start="0" data-duration="43.39" data-track-index="2" data-volume="1"></audio>
+      <audio id="music" src="assets/audio/music.wav" data-start="0" data-duration="46.5" data-track-index="3" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="46.5" data-track-index="4" data-volume="1"></audio>
+
+      <svg width="0" height="0" style="position: absolute">
+        <defs>
+          <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecdfff" /><stop offset="1" stop-color="#9b5cff" /></linearGradient>
+          <symbol id="i-target" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="url(#ig)" stroke-width="4.5" /><circle cx="24" cy="24" r="11" fill="none" stroke="url(#ig)" stroke-width="4.5" /><circle cx="24" cy="24" r="4" fill="url(#ig)" /></symbol>
+          <symbol id="i-search" viewBox="0 0 48 48"><circle cx="20" cy="20" r="13" fill="none" stroke="url(#ig)" stroke-width="5" /><path d="M30 30l12 12" stroke="url(#ig)" stroke-width="6" stroke-linecap="round" /></symbol>
+          <symbol id="i-pen" viewBox="0 0 48 48"><path d="M10 38l4-12L32 8l8 8-18 18Z" fill="url(#ig)" /><path d="M8 42h32" stroke="url(#ig)" stroke-width="4" stroke-linecap="round" /></symbol>
+          <symbol id="i-film" viewBox="0 0 48 48"><rect x="5" y="14" width="38" height="28" rx="5" fill="url(#ig)" /><path d="M5 10l38-6" stroke="url(#ig)" stroke-width="5" stroke-linecap="round" /><path d="M20 22l10 6-10 6Z" fill="#1b0d33" /></symbol>
+          <symbol id="i-send" viewBox="0 0 48 48"><path d="M4 22L44 6 30 44l-7-15Z" fill="url(#ig)" /><path d="M23 29L44 6" stroke="#1b0d33" stroke-width="3" /></symbol>
+          <symbol id="i-in" viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="9" fill="url(#ig)" /><g fill="#1b0d33"><rect x="12" y="20" width="6" height="16" /><circle cx="15" cy="13" r="3.5" /><path d="M23 20h6v2.5c1.2-2 3.3-3 5.5-3 4 0 5.5 2.6 5.5 7V36h-6v-8.5c0-2.2-.6-3.5-2.6-3.5S29 25.5 29 27.5V36h-6Z" /></g></symbol>
+          <symbol id="i-cursor" viewBox="0 0 40 48"><path d="M4 2l30 26-14 2 8 14-6 3-8-14-10 9Z" fill="#fff" stroke="#1b0d33" stroke-width="2.5" stroke-linejoin="round" /></symbol>
+          <symbol id="i-chat" viewBox="0 0 64 64"><path fill="#fff" d="M32 8C17 8 6 17.5 6 29.5c0 6.6 3.4 12.4 8.8 16.4L12 56l12-6.4c2.5.6 5.2.9 8 .9 15 0 26-9.5 26-21S47 8 32 8z" /><g fill="#8b3dff"><circle cx="21" cy="29.5" r="4" /><circle cx="32" cy="29.5" r="4" /><circle cx="43" cy="29.5" r="4" /></g></symbol>
+          <symbol id="i-mail" viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="6" fill="none" stroke="#b98cff" stroke-width="5" /><path d="M9 18l23 17 23-17" fill="none" stroke="#b98cff" stroke-width="5" stroke-linejoin="round" /></symbol>
+        </defs>
+      </svg>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const q = (s) => Array.from(document.querySelectorAll(s));
+      const num = (el, k) => parseFloat(el.dataset[k]);
+      const END = 46.5;
+      // scene cuts; tools/build_audio.py also reads this line for whoosh cues
+      const WIPES = [3.55, 12.95, 14.2, 20.2, 26.0, 29.5, 33.4, 39.45, 43.3];
+
+      // background motion
+      tl.fromTo("#arcOuter", { rotation: 0, svgOrigin: "960 540" }, { rotation: 160, svgOrigin: "960 540", duration: END, ease: "none" }, 0);
+      tl.fromTo("#arcInner", { rotation: 200, svgOrigin: "960 540" }, { rotation: 10, svgOrigin: "960 540", duration: END, ease: "none" }, 0);
+      tl.fromTo("#progress i", { scaleX: 0 }, { scaleX: 1, duration: END, ease: "none" }, 0);
+      q(".float").forEach((el, i) => {
+        tl.fromTo(el, { y: 0 }, { y: -num(el, "amp"), duration: 2.4 + i * 0.37, ease: "sine.inOut", yoyo: true, repeat: Math.floor(END / (2.4 + i * 0.37)) }, 0);
+      });
+      q(".spin").forEach((el) => tl.fromTo(el, { rotation: 0 }, { rotation: 180, duration: END, ease: "none" }, 0));
+
+      // typewriter: one span per character, switched on in sequence so carets follow the text
+      q("[data-type]").forEach((el) => {
+        const text = el.textContent;
+        el.textContent = "";
+        const t0 = num(el, "type");
+        const step = num(el, "dur") / text.length;
+        Array.from(text).forEach((c, i) => {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c;
+          el.appendChild(s);
+          tl.set(s, { display: "inline" }, t0 + i * step);
+        });
+      });
+
+      q(".w").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 22, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.24, ease: "power2.out" }, num(el, "t"));
+      });
+      q(".big").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 1.25, filter: "blur(18px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }, num(el, "t"));
+      });
+      q(".hl").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.26, ease: "back.out(2.2)" }, num(el, "t"));
+      });
+      q(".wipe").forEach((el) => {
+        tl.fromTo(el, { clipPath: "inset(-20% 100% -20% 0%)" }, { clipPath: "inset(-20% -5% -20% 0%)", duration: 0.32, ease: "power2.out" }, num(el, "t"));
+      });
+      q(".pop").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2)" }, num(el, "t"));
+      });
+      q(".rise").forEach((el) => {
+        tl.fromTo(el, { opacity: 0, y: 46, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, num(el, "t"));
+      });
+      q(".fade").forEach((el) => {
+        tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power1.out" }, num(el, "t"));
+      });
+      q(".grow").forEach((el) => {
+        tl.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: num(el, "dur"), ease: "power1.inOut" }, num(el, "t"));
+      });
+      q("[data-hide]").forEach((el) => tl.to(el, { opacity: 0, duration: 0.01 }, num(el, "hide")));
+
+      // job rows: highlight ring follows the voiceover
+      q("[data-active]").forEach((el) => {
+        const [a, b] = el.dataset.active.split("-").map(parseFloat);
+        const ring = el.querySelector(".ring");
+        tl.fromTo(ring, { opacity: 0 }, { opacity: 1, duration: 0.2 }, a);
+        tl.to(ring, { opacity: 0, duration: 0.2 }, b);
+      });
+
+      // cursors glide to their target, then click
+      q(".cursor").forEach((el) => {
+        const [p0, p1] = el.dataset.path.split(" ").map((p) => p.split(",").map(Number));
+        const [m0, m1] = el.dataset.move.split("-").map(parseFloat);
+        const click = num(el, "click");
+        tl.fromTo(el, { x: p0[0], y: p0[1], opacity: 0 }, { opacity: 1, duration: 0.15 }, m0 - 0.15);
+        tl.to(el, { x: p1[0], y: p1[1], duration: m1 - m0, ease: "power2.inOut" }, m0);
+        tl.to(el, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, transformOrigin: "0 0" }, click);
+        const fx = document.createElement("i");
+        fx.className = "clickfx";
+        fx.style.left = p1[0] + 6 + "px";
+        fx.style.top = p1[1] + 4 + "px";
+        el.parentNode.appendChild(fx);
+        tl.fromTo(fx, { opacity: 0.9, scale: 0.3 }, { opacity: 0, scale: 1.6, duration: 0.4, ease: "power2.out", immediateRender: false }, click);
+      });
+      // Firecrawl toggle flips on the click
+      tl.fromTo("#fireKnob", { x: 0 }, { x: 34, duration: 0.18, ease: "power2.out" }, 21.6);
+      tl.fromTo("#fireRow", { borderColor: "rgba(255,255,255,0.1)" }, { borderColor: "rgba(166,107,255,0.8)", duration: 0.2 }, 21.6);
+
+      // step 5 window swaps from the queue to the command center
+      tl.fromTo("#queue", { opacity: 1 }, { opacity: 0, y: -20, duration: 0.25 }, 36.3);
+      tl.fromTo("#winLabelA", { opacity: 1 }, { opacity: 0.4, duration: 0.2 }, 36.3);
+
+      // carets blink while their field is active
+      q(".blink").forEach((el) => {
+        const from = num(el, "from"), to = num(el, "to");
+        tl.set(el, { opacity: 0 }, 0);
+        for (let t = from; t < to; t += 0.5) {
+          tl.set(el, { opacity: 1 }, t);
+          tl.set(el, { opacity: 0 }, Math.min(t + 0.25, to));
+        }
+      });
+
+      // captions: words light up across the spoken parts of each line
+      q(".cap").forEach((el) => {
+        const parts = el.dataset.parts.split("|").map((p) => p.split("-").map(parseFloat));
+        const texts = el.textContent.split("|");
+        el.textContent = "";
+        texts.forEach((txt, pi) => {
+          const [a, b] = parts[pi];
+          const words = txt.trim().split(/\s+/);
+          const weights = words.map((w) => w.length + 2);
+          const total = weights.reduce((x, y) => x + y, 0);
+          let acc = 0;
+          words.forEach((w, wi) => {
+            const s = document.createElement("span");
+            s.className = "cw";
+            s.textContent = w;
+            if (el.childNodes.length) el.appendChild(document.createTextNode(" "));
+            el.appendChild(s);
+            tl.to(s, { color: "#ffffff", duration: 0.12 }, a + (acc / total) * (b - a));
+            acc += weights[wi];
+          });
+        });
+        tl.fromTo(el, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.18 }, num(el, "s"));
+        tl.to(el, { opacity: 0, duration: 0.12 }, num(el, "e"));
+      });
+
+      // diagonal wipe on every cut
+      WIPES.forEach((b) => {
+        tl.fromTo("#wipe", { x: -2200, skewX: -18 }, { x: 2600, skewX: -18, duration: 0.36, ease: "power1.inOut", immediateRender: false }, b - 0.18);
+      });
+      tl.set("#wipe", { x: -2200, skewX: -18 }, 0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
