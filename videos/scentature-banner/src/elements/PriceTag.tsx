@@ -104,7 +104,7 @@ export const PriceTag = Interactive.create({
   Component: PriceTagInner,
   layout: "none",
   schema: {
-    price: { type: "string", default: "₹299", description: "Price" },
+    price: { type: "string", default: "₹549", description: "Price" },
     accent: { type: "color", default: "#E07A2E", description: "Accent colour" },
   },
 });

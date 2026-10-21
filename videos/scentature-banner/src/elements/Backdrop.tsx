@@ -1,5 +1,5 @@
 import type React from "react";
-import { Interactive, useCurrentFrame } from "remotion";
+import { Interactive, useCurrentFrame, useVideoConfig } from "remotion";
 
 type BackdropProps = {
   readonly accent: string;
@@ -18,6 +18,7 @@ const BackdropInner: React.FC<BackdropProps> = ({
   style,
 }) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
 
   return (
     <div
@@ -42,8 +43,8 @@ const BackdropInner: React.FC<BackdropProps> = ({
         }}
       />
       <svg
-        width={1920}
-        height={1080}
+        width={width}
+        height={height}
         style={{ position: "absolute", inset: 0 }}
       >
         {[260, 380, 500, 640].map((r, i) => (

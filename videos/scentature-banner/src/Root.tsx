@@ -19,6 +19,15 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
+      {/* Same timeline laid out for Reels, Shorts and Stories */}
+      <Composition
+        id="ScentatureReel"
+        component={ScentatureBanner}
+        durationInFrames={450}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
       <Folder name="Scenes">
         <Composition
           id="IntroScene"
@@ -45,7 +54,7 @@ export const RemotionRoot: React.FC = () => {
             line2: "Girl",
             shape: "drop",
             base: "#120A06",
-            price: "₹299",
+            price: "₹549",
             tagline: "Bold, warm & unforgettable.",
             accent: "#E07A2E",
             index: 1,
@@ -62,7 +71,7 @@ export const RemotionRoot: React.FC = () => {
           height={1080}
           defaultProps={{
             headline: "Four signature scents, each",
-            price: "₹299",
+            price: "₹549",
             cta: "SHOP THE COLLECTION",
             style: { backgroundColor: "#0A0A0A" },
           }}

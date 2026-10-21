@@ -5,6 +5,7 @@ import {
   interpolate,
   random,
   useCurrentFrame,
+  useVideoConfig,
 } from "remotion";
 
 export type ShapeKind = "drop" | "petal" | "leaf" | "ice" | "mixed";
@@ -19,6 +20,10 @@ type FloatingShapesProps = {
   // Horizontal band the shapes stay inside, so they keep clear of text
   readonly xMin: number;
   readonly xMax: number;
+  // Shapes fade out as they drift above this line (keeps them off headlines)
+  readonly yMin?: number;
+  // ...and fade out as they drift below this line
+  readonly yMax?: number;
   readonly style?: React.CSSProperties;
 };
 
@@ -100,9 +105,13 @@ const FloatingShapesInner: React.FC<FloatingShapesProps> = ({
   depth,
   xMin,
   xMax,
+  yMin = -1000,
+  yMax = 100000,
   style,
 }) => {
   const frame = useCurrentFrame();
+  const { height } = useVideoConfig();
+  const wrap = height + 220;
   const front = depth === "front";
 
   return (
@@ -121,7 +130,7 @@ const FloatingShapesInner: React.FC<FloatingShapesProps> = ({
         const size = front ? 110 + r("s") * 90 : 34 + r("s") * 56;
         const speed = (front ? 2.4 : 0.9) + r("v") * 1.2;
         const y =
-          ((((r("y") * 1300 - frame * speed) % 1300) + 1300) % 1300) - 160;
+          ((((r("y") * wrap - frame * speed) % wrap) + wrap) % wrap) - 160;
         const x =
           xMin + r("x") * (xMax - xMin) + Math.sin((frame + i * 20) / 26) * 24;
         const spin = (r("r") - 0.5) * 3;
@@ -136,7 +145,10 @@ const FloatingShapesInner: React.FC<FloatingShapesProps> = ({
               width: size,
               height: size * 1.3,
               rotate: `${r("a") * 360 + frame * spin}deg`,
-              opacity: front ? 0.85 : 0.55 + r("o") * 0.35,
+              opacity:
+                (front ? 0.85 : 0.55 + r("o") * 0.35) *
+                Math.min(1, Math.max(0, (y - yMin) / 120)) *
+                Math.min(1, Math.max(0, (yMax - y) / 120)),
               filter: front ? "blur(7px)" : undefined,
               scale: interpolate(frame, [i * 0.6, i * 0.6 + 14], [0, 1], {
                 extrapolateLeft: "clamp",

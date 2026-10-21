@@ -28,7 +28,7 @@ export const ScentatureBanner = () => {
           line2="Girl"
           shape="drop"
           base="#120A06"
-          price="₹299"
+          price="₹549"
           tagline="Bold, warm & unforgettable."
           accent="#E07A2E"
           index={1}
@@ -44,7 +44,7 @@ export const ScentatureBanner = () => {
           line2="Kiss"
           shape="petal"
           base="#14060C"
-          price="₹299"
+          price="₹549"
           tagline="Soft, romantic & in bloom."
           accent="#FF2E7E"
           index={2}
@@ -60,7 +60,7 @@ export const ScentatureBanner = () => {
           line2="Classic"
           shape="leaf"
           base="#04110A"
-          price="₹299"
+          price="₹549"
           tagline="Fresh, confident & timeless."
           accent="#22C55E"
           index={3}
@@ -76,7 +76,7 @@ export const ScentatureBanner = () => {
           line2="Ice"
           shape="ice"
           base="#050A18"
-          price="₹299"
+          price="₹549"
           tagline="Cool, crisp & electric."
           accent="#3B6BFF"
           index={4}
@@ -88,7 +88,7 @@ export const ScentatureBanner = () => {
           from={12 * fps}
           durationInFrames={3 * fps}
           headline="Four signature scents, each"
-          price="₹299"
+          price="₹549"
           cta="SHOP THE COLLECTION"
           style={{ backgroundColor: "#0A0A0A" }}
         />

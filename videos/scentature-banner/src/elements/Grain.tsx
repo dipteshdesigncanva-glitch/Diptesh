@@ -1,15 +1,16 @@
 import { useId } from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 
 // Moving film grain so flat colour backgrounds feel printed, not digital
 export const Grain: React.FC<{ readonly opacity: number }> = ({ opacity }) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
   const id = `grain-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
     <svg
-      width={1920}
-      height={1080}
+      width={width}
+      height={height}
       style={{
         position: "absolute",
         inset: 0,

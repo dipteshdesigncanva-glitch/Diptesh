@@ -25,13 +25,43 @@ type OutroSceneProps = {
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-const ARCH_W = 290;
-const GAP = 50;
-const ROW_LEFT = (1920 - (ARCH_W * 4 + GAP * 3)) / 2;
-const ARCH_TOP = 330;
-const BASE = 790;
 const BOTTLE_H = 400;
 const BOTTLE_W = (493 / 892) * BOTTLE_H;
+
+// 16:9 puts the four arches in a row; 9:16 stacks them in a 2x2 grid
+const LANDSCAPE = {
+  archW: 290,
+  gap: 50,
+  columns: 4,
+  rowLeft: (1920 - (290 * 4 + 50 * 3)) / 2,
+  archTop: 330,
+  rowStep: 0,
+  logo: { width: 380, top: 46 },
+  headline: { top: 196, size: 58 },
+  ctaTop: 930,
+  ctaSize: 26,
+  sides: [
+    { xMin: 20, xMax: 270 },
+    { xMin: 1650, xMax: 1900 },
+  ],
+};
+
+const PORTRAIT = {
+  archW: 380,
+  gap: 60,
+  columns: 2,
+  rowLeft: (1080 - (380 * 2 + 60)) / 2,
+  archTop: 600,
+  rowStep: 540,
+  logo: { width: 520, top: 130 },
+  headline: { top: 350, size: 66 },
+  ctaTop: 1760,
+  ctaSize: 30,
+  sides: [
+    { xMin: 0, xMax: 90 },
+    { xMin: 990, xMax: 1060 },
+  ],
+};
 
 const lineUp = [
   { src: "bottles/bad-girl.png", accent: "#E07A2E" },
@@ -46,7 +76,12 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
   cta,
 }) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps, durationInFrames, width, height } = useVideoConfig();
+  const L = height > width ? PORTRAIT : LANDSCAPE;
+  const ARCH_W = L.archW;
+  const ROW_LEFT = L.rowLeft;
+  // Bottles stand 460px below the top of their arch
+  const lastBase = L.archTop + L.rowStep * (4 / L.columns - 1) + 460;
   const beat = Math.exp(-(frame % 15) / 4);
 
   return (
@@ -65,8 +100,7 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
         count={14}
         seed="outro"
         depth="back"
-        xMin={20}
-        xMax={270}
+        {...L.sides[0]}
       />
       <FloatingShapes
         name="Shapes right"
@@ -75,30 +109,31 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
         count={14}
         seed="outro-r"
         depth="back"
-        xMin={1650}
-        xMax={1900}
+        {...L.sides[1]}
       />
 
       <Img
         src={staticFile("logo-white.png")}
         style={{
           position: "absolute",
-          left: (1920 - 380) / 2,
-          top: 46,
-          width: 380,
+          left: (width - L.logo.width) / 2,
+          top: L.logo.top,
+          width: L.logo.width,
           clipPath: `inset(0 ${interpolate(frame, [0, 16], [100, 0], { ...clamp, easing: Easing.inOut(Easing.cubic) })}% 0 0)`,
         }}
       />
       <div
         style={{
           position: "absolute",
-          top: 196,
-          width: "100%",
+          top: L.headline.top,
+          left: (width - 900) / 2,
+          width: 900,
           textAlign: "center",
           fontFamily: displayFont,
           fontStyle: "italic",
           fontWeight: 500,
-          fontSize: 58,
+          fontSize: L.headline.size,
+          lineHeight: 1.2,
           color: "#ffffff",
           opacity: interpolate(frame, [6, 16], [0, 1], clamp),
           translate: `0 ${interpolate(frame, [6, 20], [24, 0], { ...clamp, easing: ease })}px`,
@@ -118,7 +153,11 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
       </div>
 
       {lineUp.map((item, i) => {
-        const left = ROW_LEFT + i * (ARCH_W + GAP);
+        const col = i % L.columns;
+        const row = Math.floor(i / L.columns);
+        const left = ROW_LEFT + col * (ARCH_W + L.gap);
+        const ARCH_TOP = L.archTop + row * L.rowStep;
+        const BASE = ARCH_TOP + 460;
         const drop = spring({
           frame: frame - 8 - i * 4,
           fps,
@@ -135,7 +174,7 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
                 height: BASE - ARCH_TOP + 40,
                 borderRadius: `${ARCH_W / 2}px ${ARCH_W / 2}px 0 0`,
                 background: item.accent,
-                translate: `0 ${interpolate(frame, [2 + i * 3, 18 + i * 3], [700, 0], { ...clamp, easing: ease })}px`,
+                translate: `0 ${interpolate(frame, [2 + i * 3, 18 + i * 3], [height - ARCH_TOP, 0], { ...clamp, easing: ease })}px`,
               }}
             />
             <Img
@@ -147,7 +186,7 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
                 width: BOTTLE_W,
                 height: BOTTLE_H,
                 transformOrigin: "50% 100%",
-                translate: `0 ${Math.min(0, interpolate(drop, [0, 1], [-1000, 0])) - Math.abs(Math.sin((frame + i * 7) / 10)) * 8}px`,
+                translate: `0 ${Math.min(0, interpolate(drop, [0, 1], [-(BASE + 200), 0])) - Math.abs(Math.sin((frame + i * 7) / 10)) * 8}px`,
                 scale: `${1 + Math.max(0, drop - 1) * 0.3} ${1 - Math.max(0, drop - 1) * 0.6}`,
                 rotate: `${interpolate(drop, [0, 1], [i % 2 ? 16 : -16, 0])}deg`,
               }}
@@ -161,21 +200,21 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
         style={{
           position: "absolute",
           left: 0,
-          top: BASE + 40,
-          width: 1920,
+          top: lastBase + 40,
+          width,
           height: 60,
           background: "#F3E6CF",
         }}
       />
       <Marquee
         name="Names strip"
-        text="BAD GIRL  •  FLORAL KISS  •  HAWAS CLASSIC  •  HAWAS ICE  •  ₹299 EACH  •  "
+        text="BAD GIRL  •  FLORAL KISS  •  HAWAS CLASSIC  •  HAWAS ICE  •  ₹549 EACH  •  "
         fontFamily={bodyFont}
         fontSize={24}
         color="#151515"
         outline={false}
         speed={6}
-        style={{ top: BASE + 58, fontWeight: 600, letterSpacing: 3 }}
+        style={{ top: lastBase + 58, fontWeight: 600, letterSpacing: 3 }}
       />
 
       <Sparkle
@@ -183,20 +222,20 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
         size={60}
         color="#ffffff"
         delay={24}
-        style={{ left: ROW_LEFT - 80, top: 330 }}
+        style={{ left: ROW_LEFT - 80, top: L.archTop }}
       />
       <Sparkle
         name="Sparkle 2"
         size={36}
         color="#F3C96B"
         delay={30}
-        style={{ left: 1920 - ROW_LEFT + 30, top: 420 }}
+        style={{ left: width - ROW_LEFT + 30, top: L.archTop + 90 }}
       />
 
       <div
         style={{
           position: "absolute",
-          top: 930,
+          top: L.ctaTop,
           width: "100%",
           display: "flex",
           justifyContent: "center",
@@ -209,7 +248,7 @@ const OutroSceneInner: React.FC<OutroSceneProps> = ({
             gap: 16,
             fontFamily: bodyFont,
             fontWeight: 600,
-            fontSize: 26,
+            fontSize: L.ctaSize,
             letterSpacing: 3,
             color: "#111111",
             background: "#ffffff",
@@ -258,7 +297,7 @@ export const OutroScene = Interactive.create({
       default: "Four signature scents, each",
       description: "Headline",
     },
-    price: { type: "string", default: "₹299", description: "Price" },
+    price: { type: "string", default: "₹549", description: "Price" },
     cta: {
       type: "string",
       default: "SHOP THE COLLECTION",

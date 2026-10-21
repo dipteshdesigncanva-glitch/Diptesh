@@ -1,5 +1,5 @@
 import type React from "react";
-import { Interactive, useCurrentFrame } from "remotion";
+import { Interactive, useCurrentFrame, useVideoConfig } from "remotion";
 
 type MarqueeProps = {
   readonly text: string;
@@ -22,13 +22,14 @@ const MarqueeInner: React.FC<MarqueeProps> = ({
   style,
 }) => {
   const frame = useCurrentFrame();
+  const { width } = useVideoConfig();
 
   return (
     <div
       style={{
         position: "absolute",
         left: 0,
-        width: 1920,
+        width,
         overflow: "hidden",
         whiteSpace: "nowrap",
         fontFamily,

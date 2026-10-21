@@ -1,5 +1,11 @@
 import type React from "react";
-import { Easing, Interactive, interpolate, useCurrentFrame } from "remotion";
+import {
+  Easing,
+  Interactive,
+  interpolate,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
 
 type PanelWipeProps = {
   readonly first: string;
@@ -11,8 +17,11 @@ type PanelWipeProps = {
 // The cut should sit at frame 8 of this element; give it 18 frames.
 const PanelWipeInner: React.FC<PanelWipeProps> = ({ first, second, style }) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  // Panels are wide enough, and the slant shallow enough, to cover any frame shape
+  const panelW = width + 600;
   const sweep = (start: number) =>
-    interpolate(frame, [start, start + 14], [2100, -2700], {
+    interpolate(frame, [start, start + 14], [width + 180, -(panelW + 200)], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: Easing.bezier(0.7, 0, 0.3, 1),
@@ -32,8 +41,8 @@ const PanelWipeInner: React.FC<PanelWipeProps> = ({ first, second, style }) => {
         style={{
           position: "absolute",
           top: -100,
-          width: 2500,
-          height: 1280,
+          width: panelW,
+          height: height + 200,
           transform: "skewX(-14deg)",
           background: first,
           translate: `${sweep(0)}px 0`,
@@ -43,8 +52,8 @@ const PanelWipeInner: React.FC<PanelWipeProps> = ({ first, second, style }) => {
         style={{
           position: "absolute",
           top: -100,
-          width: 2500,
-          height: 1280,
+          width: panelW,
+          height: height + 200,
           transform: "skewX(-14deg)",
           background: second,
           translate: `${sweep(3)}px 0`,

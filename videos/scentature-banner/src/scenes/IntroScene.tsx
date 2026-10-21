@@ -6,6 +6,7 @@ import {
   interpolate,
   staticFile,
   useCurrentFrame,
+  useVideoConfig,
 } from "remotion";
 import { Grain } from "../elements/Grain";
 import { TypeOn } from "../elements/KineticText";
@@ -24,6 +25,23 @@ const COLORS = ["#E07A2E", "#FF2E7E", "#22C55E", "#3B6BFF"];
 
 const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const portrait = height > width;
+  // Logo box, centred in either frame shape; the sparkles hang off it
+  const logo = { left: (width - 860) / 2, top: (height - 1080) / 2 + 330 };
+  const labelSize = portrait ? 24 : 20;
+  // Landscape: shapes stay in side columns. Portrait: they stay below the logo.
+  const bands = portrait
+    ? [
+        { xMin: 30, xMax: 1050, yMin: 1250 },
+        { xMin: 30, xMax: 1050, yMax: 620 },
+        { xMin: 30, xMax: 1050, yMin: 1250 },
+      ]
+    : [
+        { xMin: 30, xMax: 430, yMin: -1000 },
+        { xMin: 1490, xMax: 1890, yMin: -1000 },
+        { xMin: 30, xMax: 430, yMin: -1000 },
+      ];
 
   return (
     <>
@@ -33,15 +51,15 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           key={color}
           style={{
             position: "absolute",
-            left: i * 480,
+            left: (i * width) / 4,
             top: 0,
-            width: 480,
-            height: 1080,
+            width: width / 4 + 1,
+            height,
             background: color,
             translate: `0 ${interpolate(
               frame,
               [i * 2, i * 2 + 10, i * 2 + 12, i * 2 + 22],
-              [1080, 0, 0, -1080],
+              [height, 0, 0, -height],
               {
                 ...clamp,
                 easing: Easing.inOut(Easing.cubic),
@@ -58,8 +76,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
         count={6}
         seed="intro-a"
         depth="back"
-        xMin={30}
-        xMax={430}
+        {...bands[0]}
       />
       <FloatingShapes
         name="Shapes pink"
@@ -68,8 +85,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
         count={5}
         seed="intro-b"
         depth="back"
-        xMin={1490}
-        xMax={1890}
+        {...bands[1]}
       />
       <FloatingShapes
         name="Shapes blue"
@@ -78,8 +94,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
         count={4}
         seed="intro-c"
         depth="back"
-        xMin={30}
-        xMax={430}
+        {...bands[2]}
       />
 
       {/* Thin frame lines that draw in from the corners */}
@@ -90,7 +105,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           top: 60,
           height: 2,
           background: "rgba(255,255,255,0.5)",
-          width: interpolate(frame, [18, 36], [0, 1800], {
+          width: interpolate(frame, [18, 36], [0, width - 120], {
             ...clamp,
             easing: ease,
           }),
@@ -103,7 +118,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           bottom: 60,
           height: 2,
           background: "rgba(255,255,255,0.5)",
-          width: interpolate(frame, [18, 36], [0, 1800], {
+          width: interpolate(frame, [18, 36], [0, width - 120], {
             ...clamp,
             easing: ease,
           }),
@@ -118,13 +133,13 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           left: 60,
           top: 80,
           fontFamily: bodyFont,
-          fontSize: 20,
+          fontSize: labelSize,
           letterSpacing: 3,
           color: "#fff",
         }}
       />
       <TypeOn
-        text="4 SIGNATURE SCENTS  ·  ₹299 EACH"
+        text="4 SIGNATURE SCENTS  ·  ₹549 EACH"
         start={26}
         charsPerFrame={2}
         style={{
@@ -132,7 +147,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
           right: 60,
           bottom: 80,
           fontFamily: bodyFont,
-          fontSize: 20,
+          fontSize: labelSize,
           letterSpacing: 3,
           color: "#fff",
         }}
@@ -142,8 +157,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
       <div
         style={{
           position: "absolute",
-          left: 530,
-          top: 330,
+          ...logo,
           width: 860,
           scale: interpolate(frame, [18, 44, 50, 60], [1.12, 1, 1, 1.35], {
             ...clamp,
@@ -168,7 +182,7 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
       <div
         style={{
           position: "absolute",
-          top: 690,
+          top: logo.top + 360,
           width: "100%",
           textAlign: "center",
           fontFamily: bodyFont,
@@ -187,33 +201,37 @@ const IntroSceneInner: React.FC<IntroSceneProps> = ({ tagline }) => {
 
       <SpinBadge
         name="Badge"
-        text="ALL AT ₹299 • SCENTATURE • "
+        text="ALL AT ₹549 • SCENTATURE • "
         size={190}
         color="#111111"
         fill="#ffffff"
         delay={28}
-        style={{ left: 1420, top: 210 }}
+        style={
+          portrait
+            ? { left: width - 290, top: logo.top - 260 }
+            : { left: logo.left + 890, top: logo.top - 120 }
+        }
       />
       <Sparkle
         name="Sparkle 1"
         size={58}
         color="#ffffff"
         delay={30}
-        style={{ left: 470, top: 300 }}
+        style={{ left: logo.left - 60, top: logo.top - 30 }}
       />
       <Sparkle
         name="Sparkle 2"
         size={30}
         color="#FF2E7E"
         delay={34}
-        style={{ left: 1360, top: 620 }}
+        style={{ left: logo.left + 830, top: logo.top + 290 }}
       />
       <Sparkle
         name="Sparkle 3"
         size={40}
         color="#E07A2E"
         delay={38}
-        style={{ left: 600, top: 650 }}
+        style={{ left: logo.left + 70, top: logo.top + 320 }}
       />
 
       <Grain opacity={0.22} />
